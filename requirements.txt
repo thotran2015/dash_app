@@ -27,6 +27,9 @@ jupyter-client==5.3.3
 jupyter-core==4.6.1
 lxml==4.4.2
 MarkupSafe==1.1.1
+mkl-fft==1.0.15
+mkl-service==2.3.0
+ndjson==0.2.0
 numpy==1.17.4
 pandas==0.25.3
 pandas-datareader==0.8.1
