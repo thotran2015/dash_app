@@ -6,6 +6,21 @@ from app import app, server
 from layouts import layout1, layout2, layout3
 import callbacks
 
+import os
+import psycopg2
+
+DATABASE_URL = os.environ['DATABASE_URL']
+
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+
+cursor = conn.cursor()
+
+# Print PostgreSQL Connection properties
+print ( connection.get_dsn_parameters(),"\n")
+
+# Print PostgreSQL version
+cursor.execute("SELECT version();")
+
 app.layout = html.Div(children =[
     html.H1(children = 'Calculate your risk for coronary artery disease, breast cancer, or colorectal cancer',
              style = {'text-align': 'center'}),
