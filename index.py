@@ -7,7 +7,7 @@ from layouts import layout1, layout2, layout3
 import callbacks
 
 app.layout = html.Div(children =[
-    html.H1(children = 'Calculate your risk for coronary artery disease, breast cancer, or colorectal cancer',
+    html.H1(children = 'Risk Calculator for Coronary Artery Disease, Breast Cancer, or Colorectal Cancer',
              style = {'text-align': 'center'}),
     dcc.Tabs(id="tabs", value='BC', children=[
         dcc.Tab(label='Coronary Artery Disease', value='CAD'),
