@@ -1,9 +1,9 @@
-import requests
+#import requests
 import pandas as pd
 import json
 import math
 import numpy as np
-from contextlib import closing
+#from contextlib import closing
 
 import dropbox
 import csv
