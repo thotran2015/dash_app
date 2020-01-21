@@ -18,7 +18,7 @@ layout1 = html.Div(children =[
     html.Label('Nucleotide Position'),
     dcc.Input(id= 'n_pos', value =11200228, type = 'number', placeholder = 11200228),
 
-    html.Label('Alternation'),
+    html.Label('Alteration'),
     dcc.Input(id= 'alt', value = 'G-C' , type = 'text', placeholder = 'G-C'),
 
     html.Label('Basic Health Info: Check if you have'),
@@ -73,7 +73,7 @@ layout2 = html.Div(children =[
     html.Label('Nucleotide Position'),
     dcc.Input(id= 'n_pos', value = 41197701, type = 'number'),
 
-    html.Label('Alternation'),
+    html.Label('Alteration'),
     dcc.Input(id= 'alt', value = 'G-A' , type = 'text'),
 
     html.Label('Basic Health Info: Check if you have'),
@@ -131,7 +131,7 @@ layout3 = html.Div(children =[
     html.Label('Nucleotide Position'),
     dcc.Input(id= 'n_pos', value = 47630331, type = 'number'),
 
-    html.Label('Alternation'),
+    html.Label('Alteration'),
     dcc.Input(id= 'alt', value = 'A-C' , type = 'text'),
 
     html.Label('Basic Health Info: Check if you have'),

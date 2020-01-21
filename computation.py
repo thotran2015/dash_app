@@ -95,7 +95,7 @@ def get_polygenetic_input(polygenetic_selected, prs=None):
 #Process model input
 def process_model_input(var_args, input_args, phenotype_args, disease = 'BC'):
     all_args = {**var_args, **input_args, **phenotype_args}
-    data = [float(all_args[i]) for i in INPUT_PAR[disease]]
+    data = [float(all_args[i]) if 'gps_' not in i else float(all_args[i])/100 for i in INPUT_PAR[disease]]
     return pd.DataFrame({'data': data})
 
 def process_baseline_coef(df):
