@@ -42,23 +42,32 @@ def get_checklists(tab, gene, n_pos, alt, obese_hist, prs):
     Input(component_id='obese-hist', component_property='value'), Input(component_id='prs', component_property='value')
     ])
 def get_checklists(tab, gene, n_pos, alt, obese_hist, prs):
-    phenotype_args = model.get_phenotypes(disease = tab)
-    variant = model.id_variant(gene, n_pos, alt)
-    var_args = model.get_variant_data(variant)
-    #var_args = model.get_variant_data(gene, n_pos, alt, disease = tab) 
-    input_args = model.get_polygenetic_input(obese_hist, prs)
+    # phenotype_args = model.get_phenotypes(disease = tab)
+    # variant = model.id_variant(gene, n_pos, alt)
+    # var_args = model.get_variant_data(variant, disease= tab)
+    # input_args = model.get_polygenetic_input(obese_hist, prs)
 
-    survival_score, baseline = model.survival_rate(var_args, input_args, phenotype_args)
-    return {
+    # survival_score, baseline = model.survival_rate(var_args, input_args, phenotype_args)
+    return
+    {
         'data': [
-                {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
+                {'x': [1,2 3,4,5,5,6,7], 'y': [1,2 3,4,5,5,6,7], 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
 
-                {'x': list(survival_score.keys()), 'y': list(survival_score.values()), 'type': 'line', 'name': 'survival score', 'marker': dict(color='rgb(26, 118, 255)') },
             ],
         'layout': {
                 'title': 'Survival Probability of Coronary Artery Disease' 
             }
         }
+    # return {
+    #     'data': [
+    #             {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
+
+    #             {'x': list(survival_score.keys()), 'y': list(survival_score.values()), 'type': 'line', 'name': 'survival score', 'marker': dict(color='rgb(26, 118, 255)') },
+    #         ],
+    #     'layout': {
+    #             'title': 'Survival Probability of Coronary Artery Disease' 
+    #         }
+    #     }
     
 # @app.callback(Output(component_id = 'disease', component_property = 'options'),
 #               [Input(component_id = 'tabs', component_property = 'value')])
