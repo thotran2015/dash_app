@@ -51,7 +51,7 @@ def get_checklists(tab, gene, n_pos, alt, obese_hist, prs):
     return
     {
         'data': [
-                {'x': [1,2 3,4,5,5,6,7], 'y': [1,2 3,4,5,5,6,7], 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
+                {'x': [1,2, 3,4,5,5,6,7], 'y': [1,2 3,4,5,5,6,7], 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
 
             ],
         'layout': {
