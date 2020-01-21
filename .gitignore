@@ -2,5 +2,3 @@
 .DS_Store
 *.ipynb
 db_conn.py
-/data
-*__pycache__/
