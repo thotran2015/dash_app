@@ -16,7 +16,7 @@ import csv
 #to get a user's variant, you need, from the user, the gene, position of the alternation, and actual mutation.
 GENES = ['BRCA1', 'BRCA2', 'MSH2', 'MSH6', 'PMS2', 'MLH', 'LDLR', 'APOB', 'PCSK9']
 GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 9, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
-ACCESS_TOKEN = 'd0gfUKsHc6AAAAAAAAAYQgTAC0dc1S3HmNq2ghzr4pJj2i6T6qNROnDoGroBdRTT'
+ACCESS_TOKEN = 'd0gfUKsHc6AAAAAAAAAYRohSgxa_-iaq5sot3YDzsZA1sydQUeJndLwXCW1vbw_8'
 
 VARIANT_FILE = '/editable_variant_information_condensed.csv'
 PHENOTYPE_FILE = '/partial_phenotype_data.csv'
