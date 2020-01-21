@@ -33,11 +33,15 @@ layout1 = html.Div(children =[
             value = ['default'],
             labelStyle = {'display': 'block'}),
       ]),
+    html.Div(id='prs'),
     dcc.Slider(
-      id = 'prs',
+      id = 'prs-slider',
       min=-5,
       max=5,
-      marks={i: 'Label {}'.format(i) for i in range(-5,6)},
+      step = 0.1,
+      marks={i/2: str(i/2) for i in range(-10,12)},
+
+      #marks={i/10: 'Label {}'.format(i/10) for i in range(0,50)},
       value=0,
     ),
 
@@ -64,10 +68,10 @@ layout2 = html.Div(children =[
     html.Label('Breast Cancer'),
 
     html.Label('Gene'),
-    dcc.Dropdown(id = 'gene',value='BRCA1', 
+    dcc.Dropdown(id = 'gene', value='BRCA1', 
       options = [
-            {'label': 'BRACKET 1', 'value': 'BRCA1'},
-            {'label': 'BRACKET 2', 'value': 'BRCA2'}]),
+            {'label': 'BRCA 1', 'value': 'BRCA1'},
+            {'label': 'BRCA 2', 'value': 'BRCA2'}]),
 
 
     html.Label('Nucleotide Position'),
@@ -88,11 +92,14 @@ layout2 = html.Div(children =[
             value = ['default'],
             labelStyle = {'display': 'block'}),
       ]),
+    html.Div(id='prs'),
     dcc.Slider(
-      id = 'prs',
+      id = 'prs-slider',
       min=-5,
       max=5,
-      marks={i: 'Label {}'.format(i) for i in range(-5,6)},
+      step = 0.1,
+      #marks={i: str(i) for i in range(-5,6)},
+      marks={i/2: str(i/2) for i in range(-10,12)},
       value=0,
     ),
 
@@ -146,11 +153,14 @@ layout3 = html.Div(children =[
             value = ['default'],
             labelStyle = {'display': 'block'}),
       ]),
+    html.Div(id='prs'),
     dcc.Slider(
-      id = 'prs',
+      id = 'prs-slider',
       min=-5,
       max=5,
-      marks={i: 'Label {}'.format(i) for i in range(-5,6)},
+      step = 0.1,
+      marks={i/2: str(i/2) for i in range(-10,12)},
+      #marks={i: 'Label {}'.format(i) for i in range(-50,60)},
       value=0,
     ),
 
