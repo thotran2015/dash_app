@@ -120,10 +120,11 @@ def process_model_input(var_args, input_args, phenotype_args, disease = 'BC'):
     if disease == 'CC':
         if 'PRS' in all_args:
             all_args['gps_ibd'] = all_args['PRS']
-
-    # all_args['allele_frequency'] = np.log10(float(all_args['allele_frequency']))
+    # all_args['allele_frequency'] = float(all_args['allele_frequency'])
     # if all_args['allele_frequency'] == 0:
     #     all_args['allele_frequency'] = 3e-6
+    # all_args['allele_frequency'] = np.log10(all_args['allele_frequency'])
+
     #print('allele:', all_args['allele_frequency'])
     data = [float(all_args[i]) for i in INPUT_PAR[disease]]
     return pd.DataFrame({'data': data})
