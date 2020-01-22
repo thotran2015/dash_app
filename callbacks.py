@@ -17,11 +17,11 @@ import computation as model
 #generate tab
 DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary Artery Disease'}
 
-# @app.callback(
-#     Output('prs', 'children'),
-#     [Input('prs-slider', 'value')])
-# def update_output(value):
-#     return 'You have selected PRS of {}'.format(value)
+@app.callback(
+    Output('prs', 'children'),
+    [Input('prs-slider', 'value')])
+def update_output(value):
+    return 'You have selected PRS of {}'.format(value)
 
 # @app.callback(
 #     Output(component_id='test-output', component_property='children'),
