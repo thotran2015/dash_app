@@ -38,6 +38,23 @@ PHENOTYPE_PAR = {'BC': ['PC1', 'PC2', 'PC3', 'PC4', 'gps_breastcancer'],
                 'CC': ['PC1', 'PC2', 'PC3', 'PC4', 'gps_ibd']}
 
 
+#coef PRS                     0.042570
+# MSH2 Variant            0.624879
+# MSH6 Variant            0.174721
+# MLH1 Variant            1.131855
+# PMS2 Variant            0.194091
+# Family History          0.781702
+# log Allele Frequency   -0.241532
+# PC1                    -0.005907
+# PC2                     0.043750
+# PC3                    -0.063961
+# PC4                    -0.044735
+# GPS IBD                -0.466696
+# Missense                0.358754
+# Nonsense                0.463707
+# Frameshift              0.608907
+# Insertion/Deletion      0.271606
+
 # PHENOTYPE_PAR = {'BC': ['PC1', 'PC2', 'PC3', 'PC4'],
 #                 'CC': ['PC1', 'PC2', 'PC3', 'PC4']}
 
@@ -147,7 +164,7 @@ def get_survival_prob(var_args, input_args, phenotype_args, disease='BC'):
     baseline, coef = process_baseline_coef(disease)
     print('coef', coef)
     print('data', data)
-
+    print('prod', coef.to_numpy()*data)
     prod = math.exp(np.sum(coef.to_numpy()*data))
     return {age: prob*prod for age, prob in baseline.to_dict().items()}
 
