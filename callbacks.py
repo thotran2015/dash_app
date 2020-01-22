@@ -17,76 +17,78 @@ import computation as model
 #generate tab
 DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary Artery Disease'}
 
-@app.callback(
-    Output('prs', 'children'),
-    [Input('prs-slider', 'value')])
-def update_output(value):
-    return 'You have selected PRS of {}'.format(value)
-
-@app.callback(
-    Output(component_id='test-output', component_property='children'),
-    [Input(component_id='tabs', component_property='value'), 
-    Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
-    Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
-    ])
-def get_checklists(tab, gene, n_pos, alt, obese_hist, prs):
-    phenotype_args = model.get_phenotypes(disease = tab)
-    variant = model.id_variant(gene, n_pos, alt)
-    var_args = model.get_variant_data(variant)
-    #var_args = model.get_variant_data(gene, n_pos, alt, disease = tab) 
-    input_args = model.get_polygenetic_input(tab, obese_hist, gene, prs)
-
-    #survival_score = model.survival_rate(var_args, input_args, phenotype_args)
-    return list(input_args.values())
-
-
-
+# @app.callback(
+#     Output('prs', 'children'),
+#     [Input('prs-slider', 'value')])
+# def update_output(value):
+#     return 'You have selected PRS of {}'.format(value)
 
 # @app.callback(
-#     Output(component_id='survival-plot', component_property='figure'),
+#     Output(component_id='test-output', component_property='children'),
 #     [Input(component_id='tabs', component_property='value'), 
 #     Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
 #     Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
 #     ])
 # def get_checklists(tab, gene, n_pos, alt, obese_hist, prs):
-#     if tab == "CAD":
-#         return {}
 #     phenotype_args = model.get_phenotypes(disease = tab)
 #     variant = model.id_variant(gene, n_pos, alt)
-#     var_args = model.get_variant_data(variant, disease= tab)
-#     baseline = model.get_baseline(disease= tab)
-#     if var_args == 'UNFOUND':
-#         return {
-#         'data': [
-#                 {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
+#     var_args = model.get_variant_data(variant)
+#     #var_args = model.get_variant_data(gene, n_pos, alt, disease = tab) 
+#     input_args = model.get_polygenetic_input(tab, obese_hist, gene, prs)
 
-#             ],
-#         'layout': {
-#                 'title': 'Baseline Survival Probability of '+ DISEASES[tab]
-#             }
-#         }
-#     else:
-#         #input_args = model.get_polygenetic_input(obese_hist, prs)
-#         input_args = model.get_polygenetic_input(tab, obese_hist, gene, prs)
-#         survival_score = model.get_survival_prob(var_args, input_args, phenotype_args, disease = tab)
-#         return {
-#             'data': [
-#                     {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
+#     #survival_score = model.survival_rate(var_args, input_args, phenotype_args)
+#     return list(input_args.values())
 
-#                     {'x': list(survival_score.keys()), 'y': list(survival_score.values()), 'type': 'line', 'name': 'individual', 'marker': dict(color='rgb(26, 118, 255)') },
-#                 ],
-#             'layout': { 
-#                 'title' : 'Survival Probability of ' + DISEASES[tab],
-#                 'xaxis': {
-#                         'title': 'Survival Probability',
-#                         'type': 'linear' 
-#                     },
-#                 'yaxis' : {
-#                 'title': 'Survival Probability',
-#                 'type': 'linear' 
-#                     },
-#             }
-#             }
+
+
+
+@app.callback(
+    Output(component_id='survival-plot', component_property='figure'),
+    [Input(component_id='tabs', component_property='value'), 
+    Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
+    Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
+    ])
+def get_checklists(tab, gene, n_pos, alt, obese_hist, prs):
+    if tab == "CAD":
+        return {}
+    phenotype_args = model.get_phenotypes(disease = tab)
+    variant = model.id_variant(gene, n_pos, alt)
+    var_args = model.get_variant_data(variant, disease= tab)
+    baseline = model.get_baseline(disease= tab)
+    if var_args == 'UNFOUND':
+        return {
+        'data': [
+                {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
+
+            ],
+        'layout': {
+                'title': 'Baseline Survival Probability of '+ DISEASES[tab]
+            }
+        }
+    else:
+        #input_args = model.get_polygenetic_input(obese_hist, prs)
+        input_args = model.get_polygenetic_input(tab, obese_hist, gene, prs)
+        survival_score = model.get_survival_prob(var_args, input_args, phenotype_args, disease = tab)
+        return {
+            'data': [
+                    {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
+
+                    {'x': list(survival_score.keys()), 'y': list(survival_score.values()), 'type': 'line', 'name': 'individual', 'marker': dict(color='rgb(26, 118, 255)') },
+                ],
+            'layout': { 
+                'title' : 'Survival Probability of ' + DISEASES[tab],
+                'xaxis': {
+                        'title': 'Survival Probability',
+                        'type': 'linear' 
+                    },
+                'yaxis' : {
+                'title': 'Survival Probability',
+                'type': 'linear' 
+                    },
+            }
+            }
+    
+
     
 # @app.callback(Output(component_id = 'disease', component_property = 'options'),
 #               [Input(component_id = 'tabs', component_property = 'value')])
