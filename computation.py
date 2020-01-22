@@ -120,14 +120,16 @@ def process_model_input(var_args, input_args, phenotype_args, disease = 'BC'):
     if disease == 'CC':
         if 'PRS' in all_args:
             all_args['gps_ibd'] = all_args['PRS']
-    # all_args['allele_frequency'] = float(all_args['allele_frequency'])
-    # if all_args['allele_frequency'] == 0:
-    #     all_args['allele_frequency'] = 3e-6
-    # all_args['allele_frequency'] = np.log10(all_args['allele_frequency'])
+    # if disease =='CC':
+    #     all_args['allele_frequency'] = -np.log10(float(all_args['allele_frequency']))
+    #     #all_args['allele_frequency'] = np.log10(all_args['allele_frequency'])
+    #     if all_args['allele_frequency'] == 0.0:
+    #         all_args['allele_frequency'] = 3e-6
 
     #print('allele:', all_args['allele_frequency'])
     data = [float(all_args[i]) for i in INPUT_PAR[disease]]
-    return pd.DataFrame({'data': data})
+    #return pd.DataFrame({'data': data})
+    return np.asarray(data)
 
 def process_baseline_coef(disease='BC'):
     disease_model = DISEASE_MODELS[disease]
@@ -143,7 +145,10 @@ def get_baseline(disease='BC'):
 def get_survival_prob(var_args, input_args, phenotype_args, disease='BC'):
     data = process_model_input(var_args, input_args, phenotype_args, disease)
     baseline, coef = process_baseline_coef(disease)
-    prod = math.exp(np.sum(coef.to_numpy()*data.to_numpy()))
+    print('coef', coef)
+    print('data', data)
+
+    prod = math.exp(np.sum(coef.to_numpy()*data))
     return {age: prob*prod for age, prob in baseline.to_dict().items()}
 
 

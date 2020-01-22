@@ -78,18 +78,18 @@ def get_checklists(tab, gene, n_pos, alt, obese_hist, prs):
             'layout': { 
                 'title' : 'Survival Probability of ' + DISEASES[tab],
                 'xaxis': {
-                        'title': 'Survival Probability',
-                        'type': 'linear' 
+                    'title': 'Survival Probability',
+                    'type': 'linear' 
                     },
                 'yaxis' : {
-                'title': 'Survival Probability',
-                'type': 'linear' 
+                    'title': 'Survival Probability',
+                    'type': 'linear' 
                     },
             }
             }
     
 
-    
+
 # @app.callback(Output(component_id = 'disease', component_property = 'options'),
 #               [Input(component_id = 'tabs', component_property = 'value')])
 # def render_tab_content(tab):
