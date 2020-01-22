@@ -69,6 +69,19 @@ app.layout = html.Div(children =[
 
 # Set menu tabs
 
+
+
+    #r = requests.get(api_url, headers={ "Content-Type" : "application/json"})
+    # if not r.ok:
+    #     r.raise_for_status()
+    #     sys.exit()
+ 
+    # decoded = r.json()
+
+    # print('NEXT VARIANT DATA')
+    # print('VARIANT_url:' + api_url)
+    # print(repr(decoded))
+
 @app.callback(Output(component_id = 'page-content', component_property = 'children'), 
                 [Input(component_id = 'tabs', component_property = 'value')])
 def render_tab_title(tab):
@@ -82,17 +95,5 @@ def render_tab_title(tab):
 
 # start Flask server
 if __name__ == '__main__':
-
-    #r = requests.get(api_url, headers={ "Content-Type" : "application/json"})
-    # if not r.ok:
-    #     r.raise_for_status()
-    #     sys.exit()
- 
-    # decoded = r.json()
-
-    # print('NEXT VARIANT DATA')
-    # print('VARIANT_url:' + api_url)
-    # print(repr(decoded))
-
     app.run_server(debug = True)
 
