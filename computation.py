@@ -75,7 +75,6 @@ def get_phenotypes(disease='BC', phenotype_file = PHENOTYPE_FILE):
     #df = access_dropbox_file(phenotype_file)
     df = pd.read_json(phenotype_file)
     if disease in PHENOTYPE_PAR:
-        print(df[PHENOTYPE_PAR[disease]].apply(pd.to_numeric).mean())
         return df[PHENOTYPE_PAR[disease]].apply(pd.to_numeric).mean(axis = 0, skipna = True)
     else:
         return 'No Data in Phenotype File'

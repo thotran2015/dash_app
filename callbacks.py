@@ -23,21 +23,21 @@ DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary A
 def update_output(value):
     return 'You have selected PRS of {}'.format(value)
 
-# @app.callback(
-#     Output(component_id='test-output', component_property='children'),
-#     [Input(component_id='tabs', component_property='value'), 
-#     Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
-#     Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
-#     ])
-# def get_checklists(tab, gene, n_pos, alt, obese_hist, prs):
-#     phenotype_args = model.get_phenotypes(disease = tab)
-#     variant = model.id_variant(gene, n_pos, alt)
-#     var_args = model.get_variant_data(variant)
-#     #var_args = model.get_variant_data(gene, n_pos, alt, disease = tab) 
-#     input_args = model.get_polygenetic_input(tab, obese_hist, gene, prs)
+@app.callback(
+    Output(component_id='test-output', component_property='children'),
+    [Input(component_id='tabs', component_property='value'), 
+    Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
+    Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
+    ])
+def get_checklists(tab, gene, n_pos, alt, obese_hist, prs):
+    phenotype_args = model.get_phenotypes(disease = tab)
+    variant = model.id_variant(gene, n_pos, alt)
+    var_args = model.get_variant_data(variant)
+    #var_args = model.get_variant_data(gene, n_pos, alt, disease = tab) 
+    input_args = model.get_polygenetic_input(tab, obese_hist, gene, prs)
 
-#     #survival_score = model.survival_rate(var_args, input_args, phenotype_args)
-#     return list(input_args.values())
+    #survival_score = model.survival_rate(var_args, input_args, phenotype_args)
+    return list(input_args.values())
 
 
 
