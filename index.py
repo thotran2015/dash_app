@@ -16,23 +16,23 @@ import callbacks
 #import requests, sys
 
 # set params
-DATABASE_URL = 'postgres://duozofkhzsfjvy:46ef1e44c2b9751801126174b41e124a7f1c847b9e0cf2f27af49a0a3278d5db@ec2-54-235-89-123.compute-1.amazonaws.com:5432/da1e3uq86ab5tu'
-#conn = create_engine(DATABASE_URL)
-server = "https://rest.ensembl.org"
-
-
-ext = "/vep/human/hgvs/"
-
-reg_ext = "/vep/human/region/"
-reg_variant = "1:156084729:156084729:1/A"
-
-#"1:6524705:6524705/T?"
-s_variant = '9:g.22125504G>C'
-variant = '1:g.156084729G>A'
-
-opt_par ='?CADD=1?'
-
-api_url = server+reg_ext+reg_variant
+##DATABASE_URL = 'postgres://duozofkhzsfjvy:46ef1e44c2b9751801126174b41e124a7f1c847b9e0cf2f27af49a0a3278d5db@ec2-54-235-89-123.compute-1.amazonaws.com:5432/da1e3uq86ab5tu'
+###conn = create_engine(DATABASE_URL)
+##server = "https://rest.ensembl.org"
+##
+##
+##ext = "/vep/human/hgvs/"
+##
+##reg_ext = "/vep/human/region/"
+##reg_variant = "1:156084729:156084729:1/A"
+##
+###"1:6524705:6524705/T?"
+##s_variant = '9:g.22125504G>C'
+##variant = '1:g.156084729G>A'
+##
+##opt_par ='?CADD=1?'
+##
+##api_url = server+reg_ext+reg_variant
 
 
 
@@ -68,20 +68,6 @@ app.layout = html.Div(children =[
 #############################################
 
 # Set menu tabs
-
-
-
-    #r = requests.get(api_url, headers={ "Content-Type" : "application/json"})
-    # if not r.ok:
-    #     r.raise_for_status()
-    #     sys.exit()
- 
-    # decoded = r.json()
-
-    # print('NEXT VARIANT DATA')
-    # print('VARIANT_url:' + api_url)
-    # print(repr(decoded))
-
 @app.callback(Output(component_id = 'page-content', component_property = 'children'), 
                 [Input(component_id = 'tabs', component_property = 'value')])
 def render_tab_title(tab):
@@ -95,6 +81,6 @@ def render_tab_title(tab):
 
 # start Flask server
 if __name__ == '__main__':
-    server = app.server
+    #server = app.server
     app.run_server(debug = True)
 
