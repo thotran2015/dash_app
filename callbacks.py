@@ -68,7 +68,7 @@ def get_checklists(tab, gene, n_pos, alt, obese_hist, prs):
     else:
         #input_args = model.get_polygenetic_input(obese_hist, prs)
         input_args = model.get_polygenetic_input(tab, obese_hist, gene, prs)
-        survival_score = model.get_survival_rate(var_args, input_args, phenotype_args, disease = tab)
+        survival_score = model.get_survival_prob(var_args, input_args, phenotype_args, disease = tab)
         return {
             'data': [
                     {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },

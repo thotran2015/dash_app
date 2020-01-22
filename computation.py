@@ -140,7 +140,7 @@ def get_baseline(disease='BC'):
     baseline, coef = process_baseline_coef(disease)
     return {age: prob for age, prob in baseline.to_dict().items()}
 
-def get_survival_rate(var_args, input_args, phenotype_args, disease='BC'):
+def get_survival_prob(var_args, input_args, phenotype_args, disease='BC'):
     data = process_model_input(var_args, input_args, phenotype_args, disease)
     baseline, coef = process_baseline_coef(disease)
     prod = math.exp(np.sum(coef.to_numpy()*data.to_numpy()))

@@ -7,10 +7,10 @@ from dash.dependencies import Input, Output
 from app import app, server
 from layouts import layout1, layout2, layout3
 import callbacks
-from computation import compute_survival
+#from computation import get_survival_prob
 
 # pydata stack
-import pandas as pd
+#import pandas as pd
 #from sqlalchemy import create_engine
 #import psycopg2
 #import requests, sys
