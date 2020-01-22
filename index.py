@@ -12,7 +12,7 @@ from computation import compute_survival
 # pydata stack
 import pandas as pd
 #from sqlalchemy import create_engine
-import psycopg2
+#import psycopg2
 #import requests, sys
 
 # set params

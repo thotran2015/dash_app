@@ -5,8 +5,8 @@ import math
 import numpy as np
 #from contextlib import closing
 
-import dropbox
-import csv
+#import dropbox
+#import csv
 
 
 ###########################
@@ -65,11 +65,11 @@ DISEASE_MODELS = {'BC': BC_MODEL, 'CC': CC_MODEL, 'CAD': CAD_MODEL}
 POLYGENETIC_OPTIONS = ['fam_hist', 'obese']
 #Average phenotype count (PC) values 
 
-def access_dropbox_file(file, access_token = ACCESS_TOKEN):
-    dbx = dropbox.Dropbox(access_token)
-    metadata, f = dbx.files_download(file)
-    csv_reader = list(csv.DictReader(f.content.decode().splitlines(), delimiter=','))
-    return pd.DataFrame(csv_reader)
+# def access_dropbox_file(file, access_token = ACCESS_TOKEN):
+#     dbx = dropbox.Dropbox(access_token)
+#     metadata, f = dbx.files_download(file)
+#     csv_reader = list(csv.DictReader(f.content.decode().splitlines(), delimiter=','))
+#     return pd.DataFrame(csv_reader)
 
 def get_phenotypes(disease='BC', phenotype_file = PHENOTYPE_FILE):
     #df = access_dropbox_file(phenotype_file)
@@ -125,7 +125,7 @@ def process_model_input(var_args, input_args, phenotype_args, disease = 'BC'):
     # all_args['allele_frequency'] = np.log10(float(all_args['allele_frequency']))
     # if all_args['allele_frequency'] == 0:
     #     all_args['allele_frequency'] = 3e-6
-    print('allele:', all_args['allele_frequency'])
+    #print('allele:', all_args['allele_frequency'])
     data = [float(all_args[i]) for i in INPUT_PAR[disease]]
     return pd.DataFrame({'data': data})
 
@@ -167,47 +167,47 @@ def get_survival_rate(var_args, input_args, phenotype_args, disease='BC'):
 
 
 
-def fetch_data(q, conn):
-    df = pd.read_sql(
-        sql=q,
-        con=conn
-    )
-    return df
+# def fetch_data(q, conn):
+#     df = pd.read_sql(
+#         sql=q,
+#         con=conn
+#     )
+#     return df
 
-def write_data(df, t, conn):
-    df.to_sql(name = t, con = conn, if_exists= 'append', index = False)
-
-
-def get_divisions():
-    '''Returns the list of divisions that are stored in the database'''
-
-    division_query = (
-        f'''
-        SELECT * FROM datacamp_courses
-        '''
-    )
-    divisions = fetch_data(division_query)
-    divisions = list(divisions['course_name'].sort_values(ascending=True))
-    return divisions
-
-#print('data from db', get_divisions())
+# def write_data(df, t, conn):
+#     df.to_sql(name = t, con = conn, if_exists= 'append', index = False)
 
 
-def write_patients():
-    '''Returns the list of divisions that are stored in the database'''
-    data = { 'course_name': ['hafu'] , 'course_instructor': ['Tho Becky '], 'topic': ['stat']}
-    df = pd.DataFrame(data)
-    if data ['course_name'][0] not in get_divisions():
-        write_data(df, 'datacamp_courses')
-    else:
-        print("Key already existed")
-    #divisions = list(divisions['course_name'].sort_values(ascending=True))
-    #return divisions
-def process_covariates(factor, value):
-	if factor == 'allele_freq':
-		return log(value)
-	else:
-		return value
+# def get_divisions():
+#     '''Returns the list of divisions that are stored in the database'''
 
-def compute_survival(baseline, coef, data):
-	return baseline*math.exp(coef*data)
+#     division_query = (
+#         f'''
+#         SELECT * FROM datacamp_courses
+#         '''
+#     )
+#     divisions = fetch_data(division_query)
+#     divisions = list(divisions['course_name'].sort_values(ascending=True))
+#     return divisions
+
+# #print('data from db', get_divisions())
+
+
+# def write_patients():
+#     '''Returns the list of divisions that are stored in the database'''
+#     data = { 'course_name': ['hafu'] , 'course_instructor': ['Tho Becky '], 'topic': ['stat']}
+#     df = pd.DataFrame(data)
+#     if data ['course_name'][0] not in get_divisions():
+#         write_data(df, 'datacamp_courses')
+#     else:
+#         print("Key already existed")
+#     #divisions = list(divisions['course_name'].sort_values(ascending=True))
+#     #return divisions
+# def process_covariates(factor, value):
+# 	if factor == 'allele_freq':
+# 		return log(value)
+# 	else:
+# 		return value
+
+# def compute_survival(baseline, coef, data):
+# 	return baseline*math.exp(coef*data)
