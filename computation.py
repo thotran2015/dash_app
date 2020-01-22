@@ -54,8 +54,8 @@ VAR_PAR = ["allele_frequency", "type"]
 CONSEQ = ["Silent", "Nonsense", "Missense", "Deletion", "Frameshift", "Insertion/Deletion"]
 
 #links to model coefficients and baseline
-BC_MODEL = 'https://gist.githubusercontent.com/thotran2015/0ade52a9d41353eb52f7a6127736c502/raw/a97126a9710d0dcaed4f2cf1ce3d129d567af723/trained_BC_model.json'
-CC_MODEL = 'https://gist.githubusercontent.com/thotran2015/2fb13403e5f38fabe10baa16998d1b52/raw/9c864e50a9db81832f20086d18c689f0797ce3c5/trained_CC_model.json'
+BC_MODEL = './data/trained_BC_model.json'
+CC_MODEL = './data/trained_CC_model.json'
 CAD_MODEL = ''
 
 DISEASE_MODELS = {'BC': BC_MODEL, 'CC': CC_MODEL, 'CAD': CAD_MODEL}
