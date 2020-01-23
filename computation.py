@@ -3,6 +3,7 @@ import pandas as pd
 import json
 import math
 import numpy as np
+import load_model as model_loader 
 #from contextlib import closing
 
 #import dropbox
@@ -24,6 +25,23 @@ ACCESS_TOKEN = 'd0gfUKsHc6AAAAAAAAAYRohSgxa_-iaq5sot3YDzsZA1sydQUeJndLwXCW1vbw_8
 VARIANT_FILE = './data/variant_info.json'
 PHENOTYPE_FILE = './data/phenotypes.json'
 
+
+# log Allele Frequency    0.010254
+# GERP                   -0.041921
+# Missense                0.029711
+# Nonsense                1.202384
+# Frameshift              1.002175
+# Insertion/Deletion      0.314121
+# PRS                    -0.041360
+# GPS                     0.137019
+# PC1                    -0.001912
+# PC2                    -0.001276
+# PC3                    -0.000867
+# PC4                    -0.003341
+# Family History          0.516192
+
+
+coeff_names = {"gps_breastcancer": 'GPS',  }
 
 BREAST_PAR = [ "PC1", "PC2", "PC3", "PC4", "gps_breastcancer", "fam_hist", "allele_frequency", "Silent", "Nonsense", "Missense", "Deletion", "Frameshift"]
 #log allele frequency
@@ -131,29 +149,47 @@ def get_polygenetic_input(disease, polygenetic_selected, gene_selected, prs=None
 #Process model input
 def process_model_input(var_args, input_args, phenotype_args, disease = 'BC'):
     all_args = {**var_args, **input_args, **phenotype_args}
-    if disease == 'BC':
-        if 'PRS' in all_args:
-            all_args['gps_breastcancer'] = all_args['PRS']
-    if disease == 'CC':
-        if 'PRS' in all_args:
-            all_args['gps_ibd'] = all_args['PRS']
-    # if disease =='CC':
-    #     all_args['allele_frequency'] = -np.log10(float(all_args['allele_frequency']))
-    #     #all_args['allele_frequency'] = np.log10(all_args['allele_frequency'])
-    #     if all_args['allele_frequency'] == 0.0:
-    #         all_args['allele_frequency'] = 3e-6
-
-    #print('allele:', all_args['allele_frequency'])
+    # if disease == 'BC':
+    #     if 'PRS' in all_args:
+    #         all_args['gps_breastcancer'] = all_args['PRS']
+    # if disease == 'CC':
+    #     if 'PRS' in all_args:
+    #         all_args['gps_ibd'] = all_args['PRS']
+    #if disease =='CC':
+    all_args['allele_frequency'] = -np.log10(float(all_args['allele_frequency']))
+    if all_args['allele_frequency'] == 0.0:
+        all_args['allele_frequency'] = 3e-6
     data = [float(all_args[i]) for i in INPUT_PAR[disease]]
-    #return pd.DataFrame({'data': data})
-    return np.asarray(data)
+    df = pd.DataFrame({'patient': data})
+    #[ "PC1", "PC2", "PC3", "PC4", "gps_breastcancer", "fam_hist", "allele_frequency", "Silent", "Nonsense", "Missense", "Deletion", "Frameshift"]
+    labels = ["PC1", "PC2", "PC3", "PC4", "GPS", "Family History", "log Allele Frequency", "Silent", "Nonsense", "Missense", "Insertion/Deletion", "Frameshift"]
+    df['labels'] = labels
+    df = df.set_index('labels').T
+    df['GERP'] = -5
+    df['PRS'] = all_args['PRS']
+    df['Missense']=df['Silent']
+    
+    #gerp_df = pd.DataFrame([1], columns=['data'], index=['GERP'] )
+    #df1 = df.append(gerp_df)
+    #df.loc[-1] = ['GERP'], [0]
+    #print(df1)
+    return df.drop(columns = ['Silent'])
+
+
+
+    #return np.asarray(data)
 
 def process_baseline_coef(disease='BC'):
     disease_model = DISEASE_MODELS[disease]
     df = pd.read_json(disease_model)
-    baseline = df["baseline_hazards"].dropna()
+    #baseline = df["baseline_hazards"].dropna()
     coef = df["coefficients"].dropna()
-    return baseline, coef
+    model = model_loader.load_model()
+    baseline = model.baseline_survival_
+    print(baseline)
+
+    
+    return baseline['baseline survival'] , coef
 
 def get_baseline(disease='BC'):
     baseline, coef = process_baseline_coef(disease)
@@ -162,11 +198,18 @@ def get_baseline(disease='BC'):
 def get_survival_prob(var_args, input_args, phenotype_args, disease='BC'):
     data = process_model_input(var_args, input_args, phenotype_args, disease)
     baseline, coef = process_baseline_coef(disease)
-    print('coef', coef)
-    print('data', data)
-    print('prod', coef.to_numpy()*data)
-    prod = math.exp(np.sum(coef.to_numpy()*data))
-    return {age: prob*prod for age, prob in baseline.to_dict().items()}
+    #print('coef', coef)
+    
+    print(data)
+    #print('prod', coef.to_numpy()*data)
+    model = model_loader.load_model()
+    print( model.predict_survival_function(data))
+    #print(model.baseline_hazard_)
+    #print(model.predict_hazard(data))
+    #print(model.predict_survival_function(data.T))
+    return model.predict_survival_function(data)['patient'].to_dict()
+    #prod = math.exp(np.sum(coef.to_numpy()*data))
+    #return {age: prob*prod for age, prob in baseline.to_dict().items()}
 
 
 

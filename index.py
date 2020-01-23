@@ -13,26 +13,29 @@ import callbacks
 #import pandas as pd
 #from sqlalchemy import create_engine
 #import psycopg2
-#import requests, sys
+import requests, sys
 
 # set params
 ##DATABASE_URL = 'postgres://duozofkhzsfjvy:46ef1e44c2b9751801126174b41e124a7f1c847b9e0cf2f27af49a0a3278d5db@ec2-54-235-89-123.compute-1.amazonaws.com:5432/da1e3uq86ab5tu'
 ###conn = create_engine(DATABASE_URL)
-##server = "https://rest.ensembl.org"
+server = "https://rest.ensembl.org"
 ##
 ##
-##ext = "/vep/human/hgvs/"
+ext = "/vep/human/hgvs/"
 ##
-##reg_ext = "/vep/human/region/"
+reg_ext = "/vep/human/region/"
 ##reg_variant = "1:156084729:156084729:1/A"
 ##
 ###"1:6524705:6524705/T?"
 ##s_variant = '9:g.22125504G>C'
-##variant = '1:g.156084729G>A'
-##
+variant = '1:g.156084756C>T'
+reg_variant = "1:156084756:156084756:1/A"
+#'1:g.156084729G>A'
+##AGT:c.803T>C
 ##opt_par ='?CADD=1?'
 ##
-##api_url = server+reg_ext+reg_variant
+api_url = server+ext+variant
+api_url_ext = server + reg_ext + reg_variant
 
 
 
@@ -82,5 +85,13 @@ def render_tab_title(tab):
 # start Flask server
 if __name__ == '__main__':
     #server = app.server
+    # print('url', api_url)
+    # r = requests.get(api_url, headers={ "Content-Type" : "application/json"})
+    # if not r.ok:
+    #     r.raise_for_status()
+    #     sys.exit()
+ 
+    # decoded = r.json()
+    # print(repr(decoded))
     app.run_server(debug = True)
 

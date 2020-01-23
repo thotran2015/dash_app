@@ -15,10 +15,10 @@ layout1 = html.Div(children =[
             {'label': 'APOB', 'value': 'APOB'},
             {'label': 'PCSK 9', 'value': 'PCSK9'}]),
 
-    html.Label('Nucleotide Position'),
+    html.Label('Nucleotide Position (e.g. 11200228)'),
     dcc.Input(id= 'n_pos', value =11200228, type = 'number', placeholder = 11200228),
 
-    html.Label('Alteration'),
+    html.Label('Alteration: Reference -> Mutation (e.g. G-C)'),
     dcc.Input(id= 'alt', value = 'G-C' , type = 'text', placeholder = 'G-C'),
 
     html.Label('Basic Health Info: Check if you have'),
@@ -74,10 +74,10 @@ layout2 = html.Div(children =[
             {'label': 'BRCA 2', 'value': 'BRCA2'}]),
 
 
-    html.Label('Nucleotide Position'),
+    html.Label('Nucleotide Position (e.g. 41197701)'),
     dcc.Input(id= 'n_pos', value = 41197701, type = 'number'),
 
-    html.Label('Alteration'),
+    html.Label('Alteration: Reference -> Mutation (e.g. G-A)'),
     dcc.Input(id= 'alt', value = 'G-A' , type = 'text'),
 
     html.Label('Basic Health Info: Check if you have'),
@@ -135,10 +135,10 @@ layout3 = html.Div(children =[
             {'label': 'PMS 2', 'value': 'PMS2'},
             {'label': 'MLH 1', 'value': 'MLH1'}]),
 
-    html.Label('Nucleotide Position'),
+    html.Label('Nucleotide Position (e.g. 47630331)'),
     dcc.Input(id= 'n_pos', value = 47630331, type = 'number'),
 
-    html.Label('Alteration'),
+    html.Label('Alteration: Reference -> Mutation (e.g. A-C)'),
     dcc.Input(id= 'alt', value = 'A-C' , type = 'text'),
 
     html.Label('Basic Health Info: Check if you have'),
