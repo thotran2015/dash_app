@@ -75,11 +75,11 @@ app.layout = html.Div(children =[
                 [Input(component_id = 'tabs', component_property = 'value')])
 def render_tab_title(tab):
     if tab =='CAD':
-        return layout1
+        return layout2
     elif tab == 'BC':
         return layout2
     elif tab == 'CC':
-        return layout3
+        return layout2
 
 
 # start Flask server

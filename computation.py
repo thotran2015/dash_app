@@ -186,9 +186,6 @@ def process_baseline_coef(disease='BC'):
     coef = df["coefficients"].dropna()
     model = model_loader.load_model()
     baseline = model.baseline_survival_
-    print(baseline)
-
-    
     return baseline['baseline survival'] , coef
 
 def get_baseline(disease='BC'):
@@ -200,10 +197,10 @@ def get_survival_prob(var_args, input_args, phenotype_args, disease='BC'):
     baseline, coef = process_baseline_coef(disease)
     #print('coef', coef)
     
-    print(data)
+    #print(data)
     #print('prod', coef.to_numpy()*data)
     model = model_loader.load_model()
-    print( model.predict_survival_function(data))
+    #print( model.predict_survival_function(data))
     #print(model.baseline_hazard_)
     #print(model.predict_hazard(data))
     #print(model.predict_survival_function(data.T))

@@ -3,6 +3,37 @@ import dash_html_components as html
 
 #Coronary Artery Disease
 # variant sample: 19-11200228-G-C
+
+def setup_polygenetic_checklist(id):
+    return html.Div(
+      #style={'width':'10%', 'height':'100%','float':'left'},
+      children = [
+          dcc.Checklist(
+            id= id,
+            options = [
+            {'label': 'Severe obsesity', 'value': 'obese'},
+            {'label': 'Family history', 'value': 'fam_his'}],
+            value = ['default'],
+            labelStyle = {'display': 'block'}),
+      ])
+
+def setup_covariate_plot(id):
+    return html.Div( 
+            dcc.Graph(
+            id='covariate-plot-'+id,
+            config={
+                    'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
+                                               'pan2d', 'toggleSpikelines',
+                                               'hoverCompareCartesian',
+                                               'zoomOut2d', 'zoomIn2d',
+                                               'hoverClosestCartesian',
+                                               # 'sendDataToCloud',
+                                               'resetScale2d']
+            }), 
+            style = {'width': '25%', 'display': 'inline-block' }
+            )
+
+    
 layout1 = html.Div(children =[
     html.Div(id='test-output'),
     html.Label('Coronary Artery Disease'),
@@ -44,10 +75,8 @@ layout1 = html.Div(children =[
       #marks={i/10: 'Label {}'.format(i/10) for i in range(0,50)},
       value=0,
     ),
-
-            
-    html.P([
-        dcc.Graph(
+    
+    dcc.Graph(
         id='survival-plot',
         config={
                 'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
@@ -57,13 +86,29 @@ layout1 = html.Div(children =[
                                            'hoverClosestCartesian',
                                            # 'sendDataToCloud',
                                            'resetScale2d']
-        })
-       ])
+        }),
+
+            
+    html.P(
+
+        dcc.Graph(
+        id='covariate-plot',
+        config={
+                'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
+                                           'pan2d', 'toggleSpikelines',
+                                           'hoverCompareCartesian',
+                                           'zoomOut2d', 'zoomIn2d',
+                                           'hoverClosestCartesian',
+                                           # 'sendDataToCloud',
+                                           'resetScale2d']
+        },
+        style = {'width': 1000 })
+       )
     ])
 
 #Breast Cancer
 # variant sample: 17-41197701-G-A
-layout2 = html.Div(children =[
+layout2 = html.Div( children =[
     html.Div(id='test-output'),
     html.Label('Breast Cancer'),
 
@@ -104,7 +149,6 @@ layout2 = html.Div(children =[
     ),
 
             
-    html.P([
         dcc.Graph(
         id='survival-plot',
         config={
@@ -115,8 +159,26 @@ layout2 = html.Div(children =[
                                            'hoverClosestCartesian',
                                            # 'sendDataToCloud',
                                            'resetScale2d']
-        })
-       ])
+        }),
+        
+    html.Div(
+        [ setup_covariate_plot('PRS'),
+        html.Div( 
+            dcc.Graph(
+            id='covariate-plot-fam-hist',
+            config={
+                    'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
+                                               'pan2d', 'toggleSpikelines',
+                                               'hoverCompareCartesian',
+                                               'zoomOut2d', 'zoomIn2d',
+                                               'hoverClosestCartesian',
+                                               # 'sendDataToCloud',
+                                               'resetScale2d']
+            }),
+            style = {'width': '25%', 'display': 'inline-block' }
+            )
+            ],
+       )
     ])
 
 
@@ -163,10 +225,8 @@ layout3 = html.Div(children =[
       #marks={i: 'Label {}'.format(i) for i in range(-50,60)},
       value=0,
     ),
-
-            
-    html.P([
-        dcc.Graph(
+    
+    dcc.Graph(
         id='survival-plot',
         config={
                 'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
@@ -176,6 +236,35 @@ layout3 = html.Div(children =[
                                            'hoverClosestCartesian',
                                            # 'sendDataToCloud',
                                            'resetScale2d']
+        }),
+
+    
+    html.P([
+        dcc.Graph(
+        id='covariate-plot1',
+        config={
+                'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
+                                           'pan2d', 'toggleSpikelines',
+                                           'hoverCompareCartesian',
+                                           'zoomOut2d', 'zoomIn2d',
+                                           'hoverClosestCartesian',
+                                           # 'sendDataToCloud',
+                                           'resetScale2d']
+        }),
+        dcc.Graph(
+        id='covariate-plot',
+        config={
+                'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
+                                           'pan2d', 'toggleSpikelines',
+                                           'hoverCompareCartesian',
+                                           'zoomOut2d', 'zoomIn2d',
+                                           'hoverClosestCartesian',
+                                           # 'sendDataToCloud',
+                                           'resetScale2d']
         })
-       ])
+       ],  style = {'width': 1000 })
+    
+    
+    
+    
     ])

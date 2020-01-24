@@ -1,6 +1,7 @@
 from dash.dependencies import Input, Output
 from app import app
 import computation as model
+import load_model as life_model
 
 
 # import requests
@@ -16,6 +17,8 @@ import computation as model
 
 #generate tab
 DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary Artery Disease'}
+
+COLORS = ['rgb(255, 0, 0)', 'rgb(0, 0, 255)', 'rgb(0, 255, 0)', 'rgb(255,191,0)']
 
 @app.callback(
     Output('prs', 'children'),
@@ -39,7 +42,41 @@ def update_output(value):
 #     #survival_score = model.survival_rate(var_args, input_args, phenotype_args)
 #     return list(input_args.values())
 
+@app.callback(
+    Output('covariate-plot-PRS', 'figure'),
+    [Input(component_id='tabs', component_property='value'), 
+    Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
+    Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
+    ])
+def plot_covariate_groups(tab, gene, n_pos, alt, obese_hist, prs):
+    if tab == "CAD":
+        return {}
+    data = life_model.get_patient_profiles('./data/patient_profiles.csv')
+    model = life_model.fit_lifelines_model(data)
+    covariate_groups = life_model.get_covariate_groups(model)
+    cov_data = [
+      {'x': xy[0], 'y': xy[1], 'type': 'line', 'name': label, 'marker': dict(color=COLORS[i] )}
+     for i, (label, xy) in enumerate(covariate_groups.items())
+     ]
 
+    return {
+        'data': cov_data,
+            'layout': { 
+                'title' : 'Survival by PRS ',
+                'xaxis': {
+                    'title': 'Age',
+                    'type': 'linear' 
+                    },
+                'yaxis' : {
+                    'title': 'Survival Probability',
+                    'type': 'linear' 
+                    },
+                }}
+
+
+            
+    
+    
 
 
 @app.callback(
@@ -48,27 +85,36 @@ def update_output(value):
     Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
     Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
     ])
-def get_checklists(tab, gene, n_pos, alt, obese_hist, prs):
+def plot_survival_function(tab, gene, n_pos, alt, obese_hist, prs):
     if tab == "CAD":
         return {}
-    phenotype_args = model.get_phenotypes(disease = tab)
+    phenotype_args = model.get_phenotypes(disease = 'BC')
     variant = model.id_variant(gene, n_pos, alt)
-    var_args = model.get_variant_data(variant, disease= tab)
-    baseline = model.get_baseline(disease= tab)
+    var_args = model.get_variant_data(variant, disease= 'BC')
+    baseline = model.get_baseline(disease= 'BC')
+    
     if var_args == 'UNFOUND':
         return {
         'data': [
                 {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
-
             ],
         'layout': {
-                'title': 'Baseline Survival Probability of '+ DISEASES[tab]
-            }
+                'title': 'Unfound Variant: Baseline Survival Probability of '+ DISEASES[tab],
+                'xaxis': {
+                    'title': 'Age',
+                    'type': 'linear' 
+                },
+                'yaxis' : {
+                    'title': 'Survival Probability',
+                    'type': 'linear' 
+                },
+            },
+
         }
     else:
         #input_args = model.get_polygenetic_input(obese_hist, prs)
-        input_args = model.get_polygenetic_input(tab, obese_hist, gene, prs)
-        survival_score = model.get_survival_prob(var_args, input_args, phenotype_args, disease = tab)
+        input_args = model.get_polygenetic_input('BC', obese_hist, gene, prs)
+        survival_score = model.get_survival_prob(var_args, input_args, phenotype_args, disease = 'BC')
         return {
             'data': [
                     {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
@@ -78,7 +124,7 @@ def get_checklists(tab, gene, n_pos, alt, obese_hist, prs):
             'layout': { 
                 'title' : 'Survival Probability of ' + DISEASES[tab],
                 'xaxis': {
-                    'title': 'Survival Probability',
+                    'title': 'Age',
                     'type': 'linear' 
                     },
                 'yaxis' : {
