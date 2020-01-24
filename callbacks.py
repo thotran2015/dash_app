@@ -19,6 +19,8 @@ import load_model as life_model
 DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary Artery Disease'}
 
 COLORS = ['rgb(255, 0, 0)', 'rgb(0, 0, 255)', 'rgb(0, 255, 0)', 'rgb(255,191,0)']
+DATA = life_model.get_patient_profiles('./data/patient_profiles.csv')
+MODEL = life_model.fit_lifelines_model(DATA)
 
 @app.callback(
     Output('prs', 'children'),
@@ -51,9 +53,7 @@ for cov in ['PRS', 'Missense']:
     def plot_covariate_groups(tab, gene, n_pos, alt, obese_hist, prs):
         if tab == "CAD":
             return {}
-        data = life_model.get_patient_profiles('./data/patient_profiles.csv')
-        model = life_model.fit_lifelines_model(data)
-        covariate_groups = life_model.get_covariate_groups(model)
+        covariate_groups = life_model.get_covariate_groups(MODEL)
         cov_data = [
           {'x': xy[0], 'y': xy[1], 'type': 'line', 'name': label, 'marker': dict(color=COLORS[i] )}
          for i, (label, xy) in enumerate(covariate_groups.items())

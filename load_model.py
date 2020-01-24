@@ -17,8 +17,8 @@ def fit_lifelines_model(data):
 	model = cph.fit(data, duration_col= 'age_censor', event_col='breastcancer')
 	return model 
 
-def get_covariate_groups(model, covariate='Missense'):
-    lines = model.plot_covariate_groups(covariate, values=np.arange(0, 1), cmap='coolwarm').lines
+def get_covariate_groups(model, covariate='Missense', val_range=np.arange(0, 1)):
+    lines = model.plot_covariate_groups(covariate, values=val_range, cmap='coolwarm').lines
     #print(model.predict_survival_function(data.head(1)))
     return {i.get_label(): i.get_data() for i in lines}
 
