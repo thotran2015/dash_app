@@ -163,20 +163,7 @@ layout2 = html.Div( children =[
         
     html.Div(
         [ setup_covariate_plot('PRS'),
-        html.Div( 
-            dcc.Graph(
-            id='covariate-plot-fam-hist',
-            config={
-                    'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
-                                               'pan2d', 'toggleSpikelines',
-                                               'hoverCompareCartesian',
-                                               'zoomOut2d', 'zoomIn2d',
-                                               'hoverClosestCartesian',
-                                               # 'sendDataToCloud',
-                                               'resetScale2d']
-            }),
-            style = {'width': '25%', 'display': 'inline-block' }
-            )
+         setup_covariate_plot('Missense'),
             ],
        )
     ])

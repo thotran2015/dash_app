@@ -41,37 +41,37 @@ def update_output(value):
 
 #     #survival_score = model.survival_rate(var_args, input_args, phenotype_args)
 #     return list(input_args.values())
-
-@app.callback(
-    Output('covariate-plot-PRS', 'figure'),
-    [Input(component_id='tabs', component_property='value'), 
-    Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
-    Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
-    ])
-def plot_covariate_groups(tab, gene, n_pos, alt, obese_hist, prs):
-    if tab == "CAD":
-        return {}
-    data = life_model.get_patient_profiles('./data/patient_profiles.csv')
-    model = life_model.fit_lifelines_model(data)
-    covariate_groups = life_model.get_covariate_groups(model)
-    cov_data = [
-      {'x': xy[0], 'y': xy[1], 'type': 'line', 'name': label, 'marker': dict(color=COLORS[i] )}
-     for i, (label, xy) in enumerate(covariate_groups.items())
-     ]
-
-    return {
-        'data': cov_data,
-            'layout': { 
-                'title' : 'Survival by PRS ',
-                'xaxis': {
-                    'title': 'Age',
-                    'type': 'linear' 
-                    },
-                'yaxis' : {
-                    'title': 'Survival Probability',
-                    'type': 'linear' 
-                    },
-                }}
+for cov in ['PRS', 'Missense']:
+    @app.callback(
+        Output('covariate-plot-'+cov, 'figure'),
+        [Input(component_id='tabs', component_property='value'), 
+        Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
+        Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
+        ])
+    def plot_covariate_groups(tab, gene, n_pos, alt, obese_hist, prs):
+        if tab == "CAD":
+            return {}
+        data = life_model.get_patient_profiles('./data/patient_profiles.csv')
+        model = life_model.fit_lifelines_model(data)
+        covariate_groups = life_model.get_covariate_groups(model)
+        cov_data = [
+          {'x': xy[0], 'y': xy[1], 'type': 'line', 'name': label, 'marker': dict(color=COLORS[i] )}
+         for i, (label, xy) in enumerate(covariate_groups.items())
+         ]
+    
+        return {
+            'data': cov_data,
+                'layout': { 
+                    'title' : 'Survival by PRS ',
+                    'xaxis': {
+                        'title': 'Age',
+                        'type': 'linear' 
+                        },
+                    'yaxis' : {
+                        'title': 'Survival Probability',
+                        'type': 'linear' 
+                        },
+                    }}
 
 
             
