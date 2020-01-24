@@ -13,7 +13,7 @@ import callbacks
 #import pandas as pd
 #from sqlalchemy import create_engine
 #import psycopg2
-import requests, sys
+#import requests, sys
 
 # set params
 ##DATABASE_URL = 'postgres://duozofkhzsfjvy:46ef1e44c2b9751801126174b41e124a7f1c847b9e0cf2f27af49a0a3278d5db@ec2-54-235-89-123.compute-1.amazonaws.com:5432/da1e3uq86ab5tu'
