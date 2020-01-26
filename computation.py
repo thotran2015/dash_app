@@ -1,7 +1,7 @@
 
 import pandas as pd
 import numpy as np
-import load_model as model_loader 
+#import load_model as model_loader 
 
 
 ###########################
@@ -140,34 +140,34 @@ def process_model_input(var_args, input_args, phenotype_args, disease = 'BC'):
 
     #return np.asarray(data)
 
-def process_baseline_coef(disease='BC'):
-    disease_model = DISEASE_MODELS[disease]
-    df = pd.read_json(disease_model)
-    #baseline = df["baseline_hazards"].dropna()
-    coef = df["coefficients"].dropna()
-    model = model_loader.load_model()
-    baseline = model.baseline_survival_
-    return baseline['baseline survival'] , coef
+# def process_baseline_coef(disease='BC'):
+#     disease_model = DISEASE_MODELS[disease]
+#     df = pd.read_json(disease_model)
+#     #baseline = df["baseline_hazards"].dropna()
+#     coef = df["coefficients"].dropna()
+#     model = model_loader.load_model()
+#     baseline = model.baseline_survival_
+#     return baseline['baseline survival'] , coef
 
-def get_baseline(disease='BC'):
-    baseline, coef = process_baseline_coef(disease)
-    return {age: prob for age, prob in baseline.to_dict().items()}
+# def get_baseline(disease='BC'):
+#     baseline, coef = process_baseline_coef(disease)
+#     return {age: prob for age, prob in baseline.to_dict().items()}
 
-def get_survival_prob(var_args, input_args, phenotype_args, disease='BC'):
-    data = process_model_input(var_args, input_args, phenotype_args, disease)
-    baseline, coef = process_baseline_coef(disease)
-    #print('coef', coef)
+# def get_survival_prob(var_args, input_args, phenotype_args, disease='BC'):
+#     data = process_model_input(var_args, input_args, phenotype_args, disease)
+#     baseline, coef = process_baseline_coef(disease)
+#     #print('coef', coef)
     
-    #print(data)
-    #print('prod', coef.to_numpy()*data)
-    model = model_loader.load_model()
-    #print( model.predict_survival_function(data))
-    #print(model.baseline_hazard_)
-    #print(model.predict_hazard(data))
-    #print(model.predict_survival_function(data.T))
-    return model.predict_survival_function(data)['patient'].to_dict()
-    #prod = math.exp(np.sum(coef.to_numpy()*data))
-    #return {age: prob*prod for age, prob in baseline.to_dict().items()}
+#     #print(data)
+#     #print('prod', coef.to_numpy()*data)
+#     model = model_loader.load_model()
+#     #print( model.predict_survival_function(data))
+#     #print(model.baseline_hazard_)
+#     #print(model.predict_hazard(data))
+#     #print(model.predict_survival_function(data.T))
+#     return model.predict_survival_function(data)['patient'].to_dict()
+#     #prod = math.exp(np.sum(coef.to_numpy()*data))
+#     #return {age: prob*prod for age, prob in baseline.to_dict().items()}
 
 
 
