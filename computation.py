@@ -20,20 +20,6 @@ VARIANT_FILE = './data/variant_info.json'
 PHENOTYPE_FILE = './data/phenotypes.json'
 
 
-# log Allele Frequency    0.010254
-# GERP                   -0.041921
-# Missense                0.029711
-# Nonsense                1.202384
-# Frameshift              1.002175
-# Insertion/Deletion      0.314121
-# PRS                    -0.041360
-# GPS                     0.137019
-# PC1                    -0.001912
-# PC2                    -0.001276
-# PC3                    -0.000867
-# PC4                    -0.003341
-# Family History          0.516192
-
 
 coeff_names = {"gps_breastcancer": 'GPS',  }
 
