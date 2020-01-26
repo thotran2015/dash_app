@@ -81,27 +81,27 @@ def fill_survival_func(tab, baseline, survival_score = None):
     
             
 
-@app.callback(
-    Output(component_id='survival-plot', component_property='figure'),
-    [Input(component_id='tabs', component_property='value'), 
-    Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
-    Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
-    ])
-def plot_survival_function(tab, gene, n_pos, alt, obese_hist, prs):
-    if tab == "CAD":
-        return {}
-    phenotype_args = model.get_phenotypes(disease = 'BC')
-    variant = model.id_variant(gene, n_pos, alt)
-    var_args = model.get_variant_data(variant, disease= 'BC')
-    baseline = model.get_baseline(disease= 'BC')
-    if var_args == 'UNFOUND':
-        survival_plot = fill_survival_func(tab, baseline)
-    else:
-        input_args = model.get_polygenetic_input('BC', obese_hist, gene, prs)
-        survival_score = model.get_survival_prob(var_args, input_args, phenotype_args, disease = 'BC')
-        survival_plot = fill_survival_func(tab, baseline, survival_score)
+# @app.callback(
+#     Output(component_id='survival-plot', component_property='figure'),
+#     [Input(component_id='tabs', component_property='value'), 
+#     Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
+#     Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
+#     ])
+# def plot_survival_function(tab, gene, n_pos, alt, obese_hist, prs):
+#     if tab == "CAD":
+#         return {}
+#     phenotype_args = model.get_phenotypes(disease = 'BC')
+#     variant = model.id_variant(gene, n_pos, alt)
+#     var_args = model.get_variant_data(variant, disease= 'BC')
+#     baseline = model.get_baseline(disease= 'BC')
+#     if var_args == 'UNFOUND':
+#         survival_plot = fill_survival_func(tab, baseline)
+#     else:
+#         input_args = model.get_polygenetic_input('BC', obese_hist, gene, prs)
+#         survival_score = model.get_survival_prob(var_args, input_args, phenotype_args, disease = 'BC')
+#         survival_plot = fill_survival_func(tab, baseline, survival_score)
         
-    return survival_plot 
+#     return survival_plot 
     
 
 
