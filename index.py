@@ -6,8 +6,8 @@ from dash.dependencies import Input, Output
 #app, view, controller  and model modules
 #import callbacks
 from app import app, server
-#from layouts import layout1, layout2, layout3
-#import callbacks
+from layouts import layout1, layout2, layout3
+import callbacks
 #from computation import get_survival_prob
 
 
@@ -86,9 +86,6 @@ app.layout = html.Div(children =[
 #     elif tab == 'CC':
 #         return layout2
 
-
-# start Flask server
-if __name__ == '__main__':
     #server = app.server
     # print('url', api_url)
     # r = requests.get(api_url, headers={ "Content-Type" : "application/json"})
@@ -98,5 +95,8 @@ if __name__ == '__main__':
  
     # decoded = r.json()
     # print(repr(decoded))
+    
+# start Flask server
+if __name__ == '__main__':
     app.run_server(debug = True)
 

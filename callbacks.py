@@ -56,29 +56,29 @@ DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary A
 
     
 
-def fill_survival_func(tab, baseline, survival_score = None):
-    data = [
-    {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
-            ]
-    if survival_score!= None:
-        data.append(
-            {'x': list(survival_score.keys()), 'y': list(survival_score.values()), 'type': 'line', 'name': 'individual', 'marker': dict(color='rgb(26, 118, 255)') }
-                )
-    return {
-        'data': data,
-        'layout': {
-                'title': 'Unfound Variant: Baseline Survival Probability of '+ DISEASES[tab],
-                'xaxis': {
-                    'title': 'Age',
-                    'type': 'linear' 
-                },
-                'yaxis' : {
-                    'title': 'Survival Probability',
-                    'type': 'linear' 
-                },
-            },}
-    
-    
+##def fill_survival_func(tab, baseline, survival_score = None):
+##    data = [
+##    {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
+##            ]
+##    if survival_score!= None:
+##        data.append(
+##            {'x': list(survival_score.keys()), 'y': list(survival_score.values()), 'type': 'line', 'name': 'individual', 'marker': dict(color='rgb(26, 118, 255)') }
+##                )
+##    return {
+##        'data': data,
+##        'layout': {
+##                'title': 'Unfound Variant: Baseline Survival Probability of '+ DISEASES[tab],
+##                'xaxis': {
+##                    'title': 'Age',
+##                    'type': 'linear' 
+##                },
+##                'yaxis' : {
+##                    'title': 'Survival Probability',
+##                    'type': 'linear' 
+##                },
+##            },}
+##    
+##    
             
 
 # @app.callback(
@@ -105,12 +105,17 @@ def fill_survival_func(tab, baseline, survival_score = None):
     
 
 
-@app.callback(
-    Output('prs', 'children'),
-    [Input('prs-slider', 'value')])
-def update_output(value):
-    return 'You have selected PRS of {}'.format(value)
+##@app.callback(
+##    Output('prs', 'children'),
+##    [Input('prs-slider', 'value')])
+##def update_output(value):
+##    return 'You have selected PRS of {}'.format(value)
 
+
+
+
+
+#ignore rest of the code
 
 # @app.callback(
 #     Output(component_id='test-output', component_property='children'),
