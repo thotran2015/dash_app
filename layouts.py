@@ -16,7 +16,6 @@ def setup_polygenetic_checklist(id):
             value = ['default'],
             labelStyle = {'display': 'block'}),
       ])
-
 def setup_covariate_plot(id):
     return html.Div( 
             dcc.Graph(
@@ -30,84 +29,14 @@ def setup_covariate_plot(id):
                                                # 'sendDataToCloud',
                                                'resetScale2d']
             }), 
-            style = {'width': '25%', 'display': 'inline-block' }
+            style = {'width': '50%', 'display': 'inline-block' }
             )
 
-    
-layout1 = html.Div(children =[
-    html.Div(id='test-output'),
-    html.Label('Coronary Artery Disease'),
-
-    html.Label('Gene'),
-    dcc.Dropdown(id = 'gene',value='LDLR', 
-      options = [
-            # LDLR, APOB, pcsk9
-            {'label': 'LDLR', 'value': 'LDLR'},
-            {'label': 'APOB', 'value': 'APOB'},
-            {'label': 'PCSK 9', 'value': 'PCSK9'}]),
-
-    html.Label('Nucleotide Position (e.g. 11200228)'),
-    dcc.Input(id= 'n_pos', value =11200228, type = 'number', placeholder = 11200228),
-
-    html.Label('Alteration: Reference -> Mutation (e.g. G-C)'),
-    dcc.Input(id= 'alt', value = 'G-C' , type = 'text', placeholder = 'G-C'),
-
-    html.Label('Basic Health Info: Check if you have'),
-    html.Div(
-      #style={'width':'10%', 'height':'100%','float':'left'},
-      children = [
-          dcc.Checklist(
-            id= 'obese-hist',
-            options = [
-            {'label': 'Severe obsesity', 'value': 'obese'},
-            {'label': 'Family history', 'value': 'fam_his'}],
-            value = ['default'],
-            labelStyle = {'display': 'block'}),
-      ]),
-    html.Div(id='prs'),
-    dcc.Slider(
-      id = 'prs-slider',
-      min=-5,
-      max=5,
-      step = 0.1,
-      marks={i/2: str(i/2) for i in range(-10,12)},
-
-      #marks={i/10: 'Label {}'.format(i/10) for i in range(0,50)},
-      value=0,
-    ),
-    
-    dcc.Graph(
-        id='survival-plot',
-        config={
-                'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
-                                           'pan2d', 'toggleSpikelines',
-                                           'hoverCompareCartesian',
-                                           'zoomOut2d', 'zoomIn2d',
-                                           'hoverClosestCartesian',
-                                           # 'sendDataToCloud',
-                                           'resetScale2d']
-        }),
-
-            
-    html.P(
-
-        dcc.Graph(
-        id='covariate-plot',
-        config={
-                'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
-                                           'pan2d', 'toggleSpikelines',
-                                           'hoverCompareCartesian',
-                                           'zoomOut2d', 'zoomIn2d',
-                                           'hoverClosestCartesian',
-                                           # 'sendDataToCloud',
-                                           'resetScale2d']
-        },
-        style = {'width': 1000 })
-       )
-    ])
+COVARIATES = ['PRS', 'Family History','log Allele Frequency', 'type']
+cov_plot_layout = [setup_covariate_plot(cov)
+    for cov in COVARIATES]
 
 #Breast Cancer
-# variant sample: 17-41197701-G-A
 layout2 = html.Div( children =[
     html.Div(id='test-output'),
     html.Label('Breast Cancer'),
@@ -162,12 +91,10 @@ layout2 = html.Div( children =[
         }),
         
     html.Div(
-        [ setup_covariate_plot('PRS'),
-         setup_covariate_plot('Missense'),
-            ],
-       )
-    ])
+        cov_plot_layout,
 
+       ),  
+    ])
 
 #Colerect Cancer
 # variant sample : 2-47630331-A-C
@@ -254,4 +181,77 @@ layout3 = html.Div(children =[
     
     
     
+    ])
+
+    
+layout1 = html.Div(children =[
+    html.Div(id='test-output'),
+    html.Label('Coronary Artery Disease'),
+
+    html.Label('Gene'),
+    dcc.Dropdown(id = 'gene',value='LDLR', 
+      options = [
+            # LDLR, APOB, pcsk9
+            {'label': 'LDLR', 'value': 'LDLR'},
+            {'label': 'APOB', 'value': 'APOB'},
+            {'label': 'PCSK 9', 'value': 'PCSK9'}]),
+
+    html.Label('Nucleotide Position (e.g. 11200228)'),
+    dcc.Input(id= 'n_pos', value =11200228, type = 'number', placeholder = 11200228),
+
+    html.Label('Alteration: Reference -> Mutation (e.g. G-C)'),
+    dcc.Input(id= 'alt', value = 'G-C' , type = 'text', placeholder = 'G-C'),
+
+    html.Label('Basic Health Info: Check if you have'),
+    html.Div(
+      #style={'width':'10%', 'height':'100%','float':'left'},
+      children = [
+          dcc.Checklist(
+            id= 'obese-hist',
+            options = [
+            {'label': 'Severe obsesity', 'value': 'obese'},
+            {'label': 'Family history', 'value': 'fam_his'}],
+            value = ['default'],
+            labelStyle = {'display': 'block'}),
+      ]),
+    html.Div(id='prs'),
+    dcc.Slider(
+      id = 'prs-slider',
+      min=-5,
+      max=5,
+      step = 0.1,
+      marks={i/2: str(i/2) for i in range(-10,12)},
+
+      #marks={i/10: 'Label {}'.format(i/10) for i in range(0,50)},
+      value=0,
+    ),
+    
+    dcc.Graph(
+        id='survival-plot',
+        config={
+                'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
+                                           'pan2d', 'toggleSpikelines',
+                                           'hoverCompareCartesian',
+                                           'zoomOut2d', 'zoomIn2d',
+                                           'hoverClosestCartesian',
+                                           # 'sendDataToCloud',
+                                           'resetScale2d']
+        }),
+
+            
+    html.P(
+
+        dcc.Graph(
+        id='covariate-plot',
+        config={
+                'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
+                                           'pan2d', 'toggleSpikelines',
+                                           'hoverCompareCartesian',
+                                           'zoomOut2d', 'zoomIn2d',
+                                           'hoverClosestCartesian',
+                                           # 'sendDataToCloud',
+                                           'resetScale2d']
+        },
+        style = {'width': 1000 })
+       )
     ])

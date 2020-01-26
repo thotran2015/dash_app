@@ -17,16 +17,28 @@ def fit_lifelines_model(data):
 	model = cph.fit(data, duration_col= 'age_censor', event_col='breastcancer')
 	return model 
 
-def get_covariate_groups(model, covariate='Missense', val_range=np.arange(0, 1)):
-    lines = model.plot_covariate_groups(covariate, values=val_range, cmap='coolwarm').lines
+def get_covariate_groups(model, covariate, val_range):
+    axes = model.plot_covariate_groups(covariate, values=val_range, cmap='coolwarm')
+    lines = axes.lines
+    
+    axes.remove()
     #print(model.predict_survival_function(data.head(1)))
     return {i.get_label(): i.get_data() for i in lines}
+
+def get_covariate_multi_grps(model, covariate_list, val_range):
+    axes = model.plot_covariate_groups(covariate_list, values=val_range, cmap='coolwarm')
+    lines = axes.lines
+    #print('line', lines)
+    axes.remove()
+    
+    return {i.get_label(): i.get_data() for i in lines}
+    
 
 
 
 def load_model():
 	with open("BRCA2_model.pickle", "rb") as input_file:
-		model = pickle.load(input_file)
+		model = pickle.load(input_file) 
 		#print(model.hazards_)
 		return model
 #ex_model = load_model()
