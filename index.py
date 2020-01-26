@@ -23,7 +23,7 @@ import callbacks
 # set params
 ##DATABASE_URL = 'postgres://duozofkhzsfjvy:46ef1e44c2b9751801126174b41e124a7f1c847b9e0cf2f27af49a0a3278d5db@ec2-54-235-89-123.compute-1.amazonaws.com:5432/da1e3uq86ab5tu'
 ###conn = create_engine(DATABASE_URL)
-server = "https://rest.ensembl.org"
+vep_server = "https://rest.ensembl.org"
 ##
 ##
 ext = "/vep/human/hgvs/"
@@ -40,7 +40,7 @@ reg_variant = "1:156084756:156084756:1/A"
 ##opt_par ='?CADD=1?'
 ##
 api_url = server+ext+variant
-api_url_ext = server + reg_ext + reg_variant
+api_url_ext = vep_server + reg_ext + reg_variant
 
 
 
