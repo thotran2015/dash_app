@@ -39,7 +39,7 @@ reg_variant = "1:156084756:156084756:1/A"
 ##AGT:c.803T>C
 ##opt_par ='?CADD=1?'
 ##
-api_url = server+ext+variant
+api_url = vep_server+ext+variant
 api_url_ext = vep_server + reg_ext + reg_variant
 
 
