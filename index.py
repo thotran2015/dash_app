@@ -5,10 +5,23 @@ from dash.dependencies import Input, Output
 
 #app, view, controller  and model modules
 #import callbacks
-from app import app, server
+#from app import app, server
 from layouts import layout1, layout2, layout3
 #import callbacks
 #from computation import get_survival_prob
+
+
+
+
+import dash
+
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+app = dash.Dash(__name__, external_stylesheets= external_stylesheets)
+server = app.server
+app.config.suppress_callback_exceptions = True
+
+
 
 # pydata stack
 #import pandas as pd
