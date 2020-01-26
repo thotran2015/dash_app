@@ -1,9 +1,8 @@
-gunicorn>=19.7.1
+gunicorn
 plotly>=2.0.9
 dash>=0.19.0
 dash-renderer>=0.11.3
 dash-html-components>=0.8.0
 dash-core-components>=0.18.1
 pandas>=0.22.0
-scipy
 lifelines
