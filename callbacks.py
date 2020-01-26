@@ -44,15 +44,15 @@ def get_callback(cov, val_range, m = MODEL, get_cov_weights = life_model.get_cov
     return plot_covariate_groups
 
 
-@app.callback(
-    COV_OUTPUTS,
-        [Input(component_id='tabs', component_property='value'),
-         Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
-         Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')]
-    )
-def plot_covariates(tab, gene, n_pos, alt, obese_hist, prs):
-    data = [get_callback(cov, val_range)() for cov, val_range in COVARIATES.items()]
-    return data
+# @app.callback(
+#     COV_OUTPUTS,
+#         [Input(component_id='tabs', component_property='value'),
+#          Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
+#          Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')]
+#     )
+# def plot_covariates(tab, gene, n_pos, alt, obese_hist, prs):
+#     data = [get_callback(cov, val_range)() for cov, val_range in COVARIATES.items()]
+#     return data
 
     
 
