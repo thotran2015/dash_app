@@ -1,8 +1,8 @@
 from dash.dependencies import Input, Output
 from app import app
-import computation as model
-import load_model as life_model
-import numpy as np
+# import computation as model
+# import load_model as life_model
+# import numpy as np
 
 #############################################
 # Interaction Between Components / Controller
@@ -10,38 +10,38 @@ import numpy as np
 
 #generate tab
 DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary Artery Disease'}
-DATA = life_model.get_patient_profiles('./data/patient_profiles.csv')
-MODEL = life_model.fit_lifelines_model(DATA)
-#MODEL = life_model.load_model()
-COVARIATES = {'PRS':np.arange(-5, 6, 5), 'Family History': np.arange(0,2), 'log Allele Frequency':np.arange(-6,2, 2), 'type': np.eye(5)}
-COV_OUTPUTS = [Output('covariate-plot-'+cov, 'figure') for cov in COVARIATES] 
+# DATA = life_model.get_patient_profiles('./data/patient_profiles.csv')
+# MODEL = life_model.fit_lifelines_model(DATA)
+# #MODEL = life_model.load_model()
+# COVARIATES = {'PRS':np.arange(-5, 6, 5), 'Family History': np.arange(0,2), 'log Allele Frequency':np.arange(-6,2, 2), 'type': np.eye(5)}
+# COV_OUTPUTS = [Output('covariate-plot-'+cov, 'figure') for cov in COVARIATES] 
 
-def fill_covariate_groups(cov, cov_data):
-    return {'data': cov_data,
-                'layout': { 
-                    'title' : 'Survival based on '+ cov,
-                    'xaxis': {
-                        'title': 'Age',
-                        'type': 'linear' 
-                        },
-                    'yaxis' : {
-                        'title': 'Survival Probability',
-                        'type': 'linear' 
-                        },
-                    }}    
-def get_callback(cov, val_range, m = MODEL, get_cov_weights = life_model.get_covariate_groups):
-    def plot_covariate_groups():
-        covariate= cov
-        if cov =='type':
-            covariate= ['Missense', 'Nonsense', 'Frameshift', 'Insertion/Deletion', 'Other']
+# def fill_covariate_groups(cov, cov_data):
+#     return {'data': cov_data,
+#                 'layout': { 
+#                     'title' : 'Survival based on '+ cov,
+#                     'xaxis': {
+#                         'title': 'Age',
+#                         'type': 'linear' 
+#                         },
+#                     'yaxis' : {
+#                         'title': 'Survival Probability',
+#                         'type': 'linear' 
+#                         },
+#                     }}    
+# def get_callback(cov, val_range, m = MODEL, get_cov_weights = life_model.get_covariate_groups):
+#     def plot_covariate_groups():
+#         covariate= cov
+#         if cov =='type':
+#             covariate= ['Missense', 'Nonsense', 'Frameshift', 'Insertion/Deletion', 'Other']
 
-        covariate_groups = get_cov_weights(m, covariate, val_range= val_range)
-        cov_data = [
-             {'x': xy[0], 'y': xy[1], 'type': 'line', 'name': label, }
-             for i, (label, xy) in enumerate(covariate_groups.items())
-             ]
-        return fill_covariate_groups(cov, cov_data)
-    return plot_covariate_groups
+#         covariate_groups = get_cov_weights(m, covariate, val_range= val_range)
+#         cov_data = [
+#              {'x': xy[0], 'y': xy[1], 'type': 'line', 'name': label, }
+#              for i, (label, xy) in enumerate(covariate_groups.items())
+#              ]
+#         return fill_covariate_groups(cov, cov_data)
+#     return plot_covariate_groups
 
 
 # @app.callback(
