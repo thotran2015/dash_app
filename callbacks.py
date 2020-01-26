@@ -12,6 +12,7 @@ import numpy as np
 DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary Artery Disease'}
 DATA = life_model.get_patient_profiles('./data/patient_profiles.csv')
 MODEL = life_model.fit_lifelines_model(DATA)
+#MODEL = life_model.load_model()
 COVARIATES = {'PRS':np.arange(-5, 6, 5), 'Family History': np.arange(0,2), 'log Allele Frequency':np.arange(-6,2, 2), 'type': np.eye(5)}
 COV_OUTPUTS = [Output('covariate-plot-'+cov, 'figure') for cov in COVARIATES] 
 

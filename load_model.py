@@ -1,6 +1,7 @@
 import pickle 
 #import scipy
 #import lifelines
+
 from lifelines import CoxPHFitter 
 import pandas as pd
 #import numpy as np
@@ -13,9 +14,9 @@ def get_patient_profiles(file):
 	return data
 
 def fit_lifelines_model(data):
-	cph = CoxPHFitter()
-	model = cph.fit(data, duration_col= 'age_censor', event_col='breastcancer')
-	return model 
+ 	cph = CoxPHFitter()
+ 	model = cph.fit(data, duration_col= 'age_censor', event_col='breastcancer')
+ 	return model 
 
 def get_covariate_groups(model, covariate, val_range):
     axes = model.plot_covariate_groups(covariate, values=val_range, cmap='coolwarm')
