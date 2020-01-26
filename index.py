@@ -7,7 +7,7 @@ from dash.dependencies import Input, Output
 #import callbacks
 from app import app, server
 from layouts import layout1, layout2, layout3
-import callbacks
+#import callbacks
 #from computation import get_survival_prob
 
 # pydata stack
