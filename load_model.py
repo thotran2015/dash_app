@@ -40,23 +40,3 @@
 # 		return model
 #ex_model = load_model()
 
-#data = get_patient_profiles('./data/patient_profiles.csv')
-#model = fit_lifelines_model(data)
-#print(get_covariate_groups(model)['PRS=5'])
-
-#print(model.baseline_survival_)
-#plot = model.plot_covariate_groups('PRS', values=np.arange(-5, 6, 5), cmap='coolwarm')
-#print(model.predict_survival_function(data.head(1)))
-#x, y = plot.lines[-1].get_data()
-#y = plot.lines[0].get_ydata()
-#fig = tpl.figure()
-#fig.plot(x, y, label="data", width=50, height=15)
-#fig.show()
-#print(y)
-#plt.plot(x,y, 'ro')
-#plt.xlabel('entry a')
-#plt.ylabel('entry b')
-#plt.show()
-#print(x,y)
-#for i in range(len(plot.lines)):
-#    print(plot.lines[i].get_data())
