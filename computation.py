@@ -1,13 +1,7 @@
-#import requests
+
 import pandas as pd
-import json
-import math
 import numpy as np
 import load_model as model_loader 
-#from contextlib import closing
-
-#import dropbox
-#import csv
 
 
 ###########################
@@ -56,25 +50,6 @@ PHENOTYPE_PAR = {'BC': ['PC1', 'PC2', 'PC3', 'PC4', 'gps_breastcancer'],
                 'CC': ['PC1', 'PC2', 'PC3', 'PC4', 'gps_ibd']}
 
 
-#coef PRS                     0.042570
-# MSH2 Variant            0.624879
-# MSH6 Variant            0.174721
-# MLH1 Variant            1.131855
-# PMS2 Variant            0.194091
-# Family History          0.781702
-# log Allele Frequency   -0.241532
-# PC1                    -0.005907
-# PC2                     0.043750
-# PC3                    -0.063961
-# PC4                    -0.044735
-# GPS IBD                -0.466696
-# Missense                0.358754
-# Nonsense                0.463707
-# Frameshift              0.608907
-# Insertion/Deletion      0.271606
-
-# PHENOTYPE_PAR = {'BC': ['PC1', 'PC2', 'PC3', 'PC4'],
-#                 'CC': ['PC1', 'PC2', 'PC3', 'PC4']}
 
 #gene to disease
 GENE_TO_DISEASE = {'BC': ['BRCA1', 'BRCA2'], 'CC': ['MSH2', 'MSH6', 'PMS2', 'MLH1'], 'CAD': ['LDLR', 'APOB', 'PCSK9']}

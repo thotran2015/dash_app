@@ -1,11 +1,11 @@
 import pickle 
-import scipy
-import lifelines
+#import scipy
+#import lifelines
 from lifelines import CoxPHFitter 
 import pandas as pd
-import numpy as np
+#import numpy as np
 #import termplotlib as tpl
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 def get_patient_profiles(file):
 	data = pd.read_csv(file).rename(columns ={'Unnamed: 0': 'Patient'})
@@ -20,17 +20,13 @@ def fit_lifelines_model(data):
 def get_covariate_groups(model, covariate, val_range):
     axes = model.plot_covariate_groups(covariate, values=val_range, cmap='coolwarm')
     lines = axes.lines
-    
     axes.remove()
-    #print(model.predict_survival_function(data.head(1)))
     return {i.get_label(): i.get_data() for i in lines}
 
 def get_covariate_multi_grps(model, covariate_list, val_range):
     axes = model.plot_covariate_groups(covariate_list, values=val_range, cmap='coolwarm')
     lines = axes.lines
-    #print('line', lines)
     axes.remove()
-    
     return {i.get_label(): i.get_data() for i in lines}
     
 
