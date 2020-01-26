@@ -6,7 +6,7 @@ from dash.dependencies import Input, Output
 #app, view, controller  and model modules
 #import callbacks
 #from app import app, server
-from layouts import layout1, layout2, layout3
+#from layouts import layout1, layout2, layout3
 #import callbacks
 #from computation import get_survival_prob
 
@@ -84,16 +84,16 @@ app.layout = html.Div(children =[
 # Interaction Between Components / Controller
 #############################################
 
-# Set menu tabs
-@app.callback(Output(component_id = 'page-content', component_property = 'children'), 
-                [Input(component_id = 'tabs', component_property = 'value')])
-def render_tab_title(tab):
-    if tab =='CAD':
-        return layout2
-    elif tab == 'BC':
-        return layout2
-    elif tab == 'CC':
-        return layout2
+# # Set menu tabs
+# @app.callback(Output(component_id = 'page-content', component_property = 'children'), 
+#                 [Input(component_id = 'tabs', component_property = 'value')])
+# def render_tab_title(tab):
+#     if tab =='CAD':
+#         return layout2
+#     elif tab == 'BC':
+#         return layout2
+#     elif tab == 'CC':
+#         return layout2
 
 
 # start Flask server
