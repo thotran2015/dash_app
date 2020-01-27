@@ -75,16 +75,16 @@ app.layout = html.Div(children =[
 # Interaction Between Components / Controller
 #############################################
 
-# # Set menu tabs
-# @app.callback(Output(component_id = 'page-content', component_property = 'children'), 
-#                 [Input(component_id = 'tabs', component_property = 'value')])
-# def render_tab_title(tab):
-#     if tab =='CAD':
-#         return layout2
-#     elif tab == 'BC':
-#         return layout2
-#     elif tab == 'CC':
-#         return layout2
+ # Set menu tabs
+@app.callback(Output(component_id = 'page-content', component_property = 'children'), 
+                 [Input(component_id = 'tabs', component_property = 'value')])
+def render_tab_title(tab):
+    if tab =='CAD':
+        return layout2
+    elif tab == 'BC':
+        return layout2
+    elif tab == 'CC':
+        return layout2
 
     #server = app.server
     # print('url', api_url)
