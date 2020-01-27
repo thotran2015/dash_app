@@ -1,7 +1,7 @@
 
 import pandas as pd
 import numpy as np
-#import load_model as model_loader 
+import load_model as model_loader 
 
 
 ###########################
@@ -12,9 +12,6 @@ import numpy as np
 GENES = ['BRCA1', 'BRCA2', 'MSH2', 'MSH6', 'PMS2', 'MLH1', 'LDLR', 'APOB', 'PCSK9']
 GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 9, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
 ACCESS_TOKEN = 'd0gfUKsHc6AAAAAAAAAYRohSgxa_-iaq5sot3YDzsZA1sydQUeJndLwXCW1vbw_8'
-
-# VARIANT_FILE = '/editable_variant_information_condensed.csv'
-# PHENOTYPE_FILE = '/partial_phenotype_data.csv'
 
 VARIANT_FILE = './data/variant_info.json'
 PHENOTYPE_FILE = './data/phenotypes.json'
@@ -140,34 +137,26 @@ def process_model_input(var_args, input_args, phenotype_args, disease = 'BC'):
 
     #return np.asarray(data)
 
-# def process_baseline_coef(disease='BC'):
-#     disease_model = DISEASE_MODELS[disease]
-#     df = pd.read_json(disease_model)
-#     #baseline = df["baseline_hazards"].dropna()
-#     coef = df["coefficients"].dropna()
-#     model = model_loader.load_model()
-#     baseline = model.baseline_survival_
-#     return baseline['baseline survival'] , coef
+def process_baseline_coef(disease='BC'):
+    disease_model = DISEASE_MODELS[disease]
+    df = pd.read_json(disease_model)
+    #baseline = df["baseline_hazards"].dropna()
+    coef = df["coefficients"].dropna()
+    model = model_loader.load_model()
+    baseline = model.baseline_survival_
+    return baseline['baseline survival'] , coef
 
-# def get_baseline(disease='BC'):
-#     baseline, coef = process_baseline_coef(disease)
-#     return {age: prob for age, prob in baseline.to_dict().items()}
+def get_baseline(disease='BC'):
+    baseline, coef = process_baseline_coef(disease)
+    return {age: prob for age, prob in baseline.to_dict().items()}
 
-# def get_survival_prob(var_args, input_args, phenotype_args, disease='BC'):
-#     data = process_model_input(var_args, input_args, phenotype_args, disease)
-#     baseline, coef = process_baseline_coef(disease)
-#     #print('coef', coef)
-    
-#     #print(data)
-#     #print('prod', coef.to_numpy()*data)
-#     model = model_loader.load_model()
-#     #print( model.predict_survival_function(data))
-#     #print(model.baseline_hazard_)
-#     #print(model.predict_hazard(data))
-#     #print(model.predict_survival_function(data.T))
-#     return model.predict_survival_function(data)['patient'].to_dict()
-#     #prod = math.exp(np.sum(coef.to_numpy()*data))
-#     #return {age: prob*prod for age, prob in baseline.to_dict().items()}
+def get_survival_prob(var_args, input_args, phenotype_args, disease='BC'):
+    data = process_model_input(var_args, input_args, phenotype_args, disease)
+    baseline, coef = process_baseline_coef(disease)
+    model = model_loader.load_model()
+    return model.predict_survival_function(data)['patient'].to_dict()
+    #prod = math.exp(np.sum(coef.to_numpy()*data))
+    #return {age: prob*prod for age, prob in baseline.to_dict().items()}
 
 
 

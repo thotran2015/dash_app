@@ -1,4 +1,4 @@
-#import pickle 
+import pickle 
 #import scipy
 #import lifelines
 
@@ -33,10 +33,9 @@ def get_covariate_multi_grps(model, covariate_list, val_range):
 
 
 
-# def load_model():
-# 	with open("BRCA2_model.pickle", "rb") as input_file:
-# 		model = pickle.load(input_file) 
-# 		#print(model.hazards_)
-# 		return model
+def load_model():
+    with open("BRCA2_model.pickle", "rb") as input_file:
+        model = pickle.load(input_file) 
+        return model
 #ex_model = load_model()
 
