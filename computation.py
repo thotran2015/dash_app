@@ -1,7 +1,8 @@
 
 import pandas as pd
 import numpy as np
-import load_model as model_loader 
+from load_model import get_patient_profiles, fit_lifelines_model, get_covariate_groups, load_model, get_partial_hazard_ratio
+import plotly.graph_objs as go
 
 
 ###########################
@@ -40,6 +41,8 @@ GENE_TO_DISEASE = {'BC': ['BRCA1', 'BRCA2'], 'CC': ['MSH2', 'MSH6', 'PMS2', 'MLH
 #colorectal cancer variants
 #["MSH2 Variant", "MSH6 Variant" , "MLH1 Variant" , "PMS2 Variant"]
 
+DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary Artery Disease'}
+
 
 
 #parameters to look for in the VARIANT FILE 
@@ -58,11 +61,11 @@ DISEASE_MODELS = {'BC': BC_MODEL, 'CC': CC_MODEL, 'CAD': CAD_MODEL}
 POLYGENETIC_OPTIONS = ['fam_hist', 'obese']
 #Average phenotype count (PC) values 
 
-# def access_dropbox_file(file, access_token = ACCESS_TOKEN):
-#     dbx = dropbox.Dropbox(access_token)
-#     metadata, f = dbx.files_download(file)
-#     csv_reader = list(csv.DictReader(f.content.decode().splitlines(), delimiter=','))
-#     return pd.DataFrame(csv_reader)
+
+DATA = get_patient_profiles('./data/patient_profiles.csv')
+MODEL = fit_lifelines_model(DATA)
+
+
 
 def get_phenotypes(disease='BC', phenotype_file = PHENOTYPE_FILE):
     #df = access_dropbox_file(phenotype_file)
@@ -142,7 +145,7 @@ def process_baseline_coef(disease='BC'):
     df = pd.read_json(disease_model)
     #baseline = df["baseline_hazards"].dropna()
     coef = df["coefficients"].dropna()
-    model = model_loader.load_model()
+    model = load_model()
     baseline = model.baseline_survival_
     return baseline['baseline survival'] , coef
 
@@ -153,15 +156,102 @@ def get_baseline(disease='BC'):
 def get_survival_prob(var_args, input_args, phenotype_args, disease='BC'):
     data = process_model_input(var_args, input_args, phenotype_args, disease)
     baseline, coef = process_baseline_coef(disease)
-    model = model_loader.load_model()
+    model = load_model()
     return model.predict_survival_function(data)['patient'].to_dict()
     #prod = math.exp(np.sum(coef.to_numpy()*data))
     #return {age: prob*prod for age, prob in baseline.to_dict().items()}
 
+def fill_survival_func(tab, baseline, survival_score = None):
+    data = [
+    {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
+            ]
+    if survival_score!= None:
+        data.append(
+            {'x': list(survival_score.keys()), 'y': list(survival_score.values()), 'type': 'line', 'name': 'individual', 'marker': dict(color='rgb(26, 118, 255)') }
+                )
+    return {
+        'data': data,
+        'layout': {
+                'title': 'Unfound Variant: Baseline Survival Probability of '+ DISEASES[tab],
+                'xaxis': {
+                    'title': 'Age',
+                    'type': 'linear' 
+                },
+                'yaxis' : {
+                    'title': 'Survival Probability',
+                    'type': 'linear' 
+                },
+            },}
+    
+
+def fill_covariate_groups(cov, cov_data):
+ return {'data': cov_data,
+             'layout': { 
+                 'title' : 'Survival based on '+ cov,
+                 'xaxis': {
+                     'title': 'Age',
+                     'type': 'linear' 
+                     },
+                 'yaxis' : {
+                     'title': 'Survival Probability',
+                     'type': 'linear' 
+                     },
+                 }}    
+def get_callback(cov, val_range, m = MODEL, get_cov_weights = get_covariate_groups):
+ def plot_covariate_groups():
+     covariate= cov
+     if cov =='type':
+         covariate= ['Missense', 'Nonsense', 'Frameshift', 'Insertion/Deletion', 'Other']
+
+     covariate_groups = get_cov_weights(m, covariate, val_range= val_range)
+     cov_data = [
+          {'x': xy[0], 'y': xy[1], 'type': 'line', 'name': label, }
+          for i, (label, xy) in enumerate(covariate_groups.items())
+          ]
+     return fill_covariate_groups(cov, cov_data)
+ return plot_covariate_groups
 
 
+def fill_ph_ratios_plot(ph_data):
+    return {'data': ph_data,
+             'layout': { 
+                 'title' : 'Partial Hazard Ratio ',
+                 'xaxis': {
+                     'title': 'HR',
+                     'type': 'linear' 
+                     },
+                 'yaxis' : {
+                     'type': 'linear' 
+                     },
+                 }} 
+    
+
+def get_ph_ratios_callback():
+    def plot_box_plot_coef(model= MODEL):
+        ph_ratios= get_partial_hazard_ratio(model)['_nolegend_']
+        trace0 = go.Box(
+            y=ph_ratios[0]
+        )
+        trace1 = go.Box(
+            y=ph_ratios[1]
+        )
+        ph_data = [trace0, trace1]
+        return fill_ph_ratios_plot(ph_data)
+    return plot_box_plot_coef
+    
+    
+
+
+print(get_partial_hazard_ratio(MODEL))
 # baseline, coef = process_baseline_coef('BC')
 # print(coef*10)
+
+
+# def access_dropbox_file(file, access_token = ACCESS_TOKEN):
+#     dbx = dropbox.Dropbox(access_token)
+#     metadata, f = dbx.files_download(file)
+#     csv_reader = list(csv.DictReader(f.content.decode().splitlines(), delimiter=','))
+#     return pd.DataFrame(csv_reader)
 
 # dbx = dropbox.Dropbox(ACCESS_TOKEN)
 # metadata, f = dbx.files_download(DROPBOX_FILE)

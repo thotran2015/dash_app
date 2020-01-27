@@ -31,6 +31,34 @@ def setup_covariate_plot(id):
             }), 
             style = {'width': '50%', 'display': 'inline-block' }
             )
+def setup_survival_plot(id):
+    return dcc.Graph(
+        id='survival-plot-'+id,
+        config={
+                'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
+                                           'pan2d', 'toggleSpikelines',
+                                           'hoverCompareCartesian',
+                                           'zoomOut2d', 'zoomIn2d',
+                                           'hoverClosestCartesian',
+                                           # 'sendDataToCloud',
+                                           'resetScale2d']
+        })
+    
+def setup_ph_plot(id):
+    return html.Div( 
+            dcc.Graph(
+            id='ph-plot-'+id,
+            config={
+                    'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
+                                               'pan2d', 'toggleSpikelines',
+                                               'hoverCompareCartesian',
+                                               'zoomOut2d', 'zoomIn2d',
+                                               'hoverClosestCartesian',
+                                               # 'sendDataToCloud',
+                                               'resetScale2d']
+            }), 
+            style = {'width': '50%', 'display': 'inline-block' }
+            )
 
 COVARIATES = ['PRS', 'Family History','log Allele Frequency', 'type']
 cov_plot_layout = [setup_covariate_plot(cov)
@@ -76,23 +104,11 @@ layout2 = html.Div( children =[
       marks={i/2: str(i/2) for i in range(-10,12)},
       value=0,
     ),
+    setup_survival_plot(''),
+    setup_ph_plot(''),
 
-            
-        dcc.Graph(
-        id='survival-plot',
-        config={
-                'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
-                                           'pan2d', 'toggleSpikelines',
-                                           'hoverCompareCartesian',
-                                           'zoomOut2d', 'zoomIn2d',
-                                           'hoverClosestCartesian',
-                                           # 'sendDataToCloud',
-                                           'resetScale2d']
-        }),
-        
     html.Div(
         cov_plot_layout,
-
        ),  
     ])
 

@@ -4,6 +4,8 @@ import computation as model
 import load_model as life_model
 import numpy as np
 
+from computation import get_callback, fill_survival_func
+
 #############################################
 # Interaction Between Components / Controller
 #############################################
@@ -16,32 +18,7 @@ MODEL = life_model.fit_lifelines_model(DATA)
 COVARIATES = {'PRS':np.arange(-5, 6, 5), 'Family History': np.arange(0,2), 'log Allele Frequency':np.arange(-6,2, 2), 'type': np.eye(5)}
 COV_OUTPUTS = [Output('covariate-plot-'+cov, 'figure') for cov in COVARIATES] 
 
-def fill_covariate_groups(cov, cov_data):
- return {'data': cov_data,
-             'layout': { 
-                 'title' : 'Survival based on '+ cov,
-                 'xaxis': {
-                     'title': 'Age',
-                     'type': 'linear' 
-                     },
-                 'yaxis' : {
-                     'title': 'Survival Probability',
-                     'type': 'linear' 
-                     },
-                 }}    
-def get_callback(cov, val_range, m = MODEL, get_cov_weights = life_model.get_covariate_groups):
- def plot_covariate_groups():
-     covariate= cov
-     if cov =='type':
-         covariate= ['Missense', 'Nonsense', 'Frameshift', 'Insertion/Deletion', 'Other']
 
-     covariate_groups = get_cov_weights(m, covariate, val_range= val_range)
-     cov_data = [
-          {'x': xy[0], 'y': xy[1], 'type': 'line', 'name': label, }
-          for i, (label, xy) in enumerate(covariate_groups.items())
-          ]
-     return fill_covariate_groups(cov, cov_data)
- return plot_covariate_groups
 
 
 @app.callback(
@@ -56,33 +33,12 @@ def plot_covariates(tab, gene, n_pos, alt, obese_hist, prs):
 
     
 
-def fill_survival_func(tab, baseline, survival_score = None):
-    data = [
-    {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
-            ]
-    if survival_score!= None:
-        data.append(
-            {'x': list(survival_score.keys()), 'y': list(survival_score.values()), 'type': 'line', 'name': 'individual', 'marker': dict(color='rgb(26, 118, 255)') }
-                )
-    return {
-        'data': data,
-        'layout': {
-                'title': 'Unfound Variant: Baseline Survival Probability of '+ DISEASES[tab],
-                'xaxis': {
-                    'title': 'Age',
-                    'type': 'linear' 
-                },
-                'yaxis' : {
-                    'title': 'Survival Probability',
-                    'type': 'linear' 
-                },
-            },}
-    
+
     
             
 
 @app.callback(
-    Output(component_id='survival-plot', component_property='figure'),
+    Output(component_id='survival-plot-', component_property='figure'),
     [Input(component_id='tabs', component_property='value'), 
     Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
     Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
@@ -109,6 +65,18 @@ def plot_survival_function(tab, gene, n_pos, alt, obese_hist, prs):
     [Input('prs-slider', 'value')])
 def update_output(value):
     return 'You have selected PRS of {}'.format(value)
+
+
+# @app.callback(
+#     Output(component_id='survival-plot-ph', component_property='figure'),
+#     [Input(component_id='tabs', component_property='value'), 
+#     Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
+#     Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
+#     ])
+# def plot_ph_ratios(tab, gene, n_pos, alt, obese_hist, prs):
+#     return {}
+    
+    
 
 
 
