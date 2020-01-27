@@ -1,6 +1,6 @@
 from dash.dependencies import Input, Output
 from app import app
-# import computation as model
+import computation as model
 import load_model as life_model
 import numpy as np
 
@@ -56,52 +56,52 @@ def plot_covariates(tab, gene, n_pos, alt, obese_hist, prs):
 
     
 
-##def fill_survival_func(tab, baseline, survival_score = None):
-##    data = [
-##    {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
-##            ]
-##    if survival_score!= None:
-##        data.append(
-##            {'x': list(survival_score.keys()), 'y': list(survival_score.values()), 'type': 'line', 'name': 'individual', 'marker': dict(color='rgb(26, 118, 255)') }
-##                )
-##    return {
-##        'data': data,
-##        'layout': {
-##                'title': 'Unfound Variant: Baseline Survival Probability of '+ DISEASES[tab],
-##                'xaxis': {
-##                    'title': 'Age',
-##                    'type': 'linear' 
-##                },
-##                'yaxis' : {
-##                    'title': 'Survival Probability',
-##                    'type': 'linear' 
-##                },
-##            },}
-##    
-##    
+def fill_survival_func(tab, baseline, survival_score = None):
+    data = [
+    {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
+            ]
+    if survival_score!= None:
+        data.append(
+            {'x': list(survival_score.keys()), 'y': list(survival_score.values()), 'type': 'line', 'name': 'individual', 'marker': dict(color='rgb(26, 118, 255)') }
+                )
+    return {
+        'data': data,
+        'layout': {
+                'title': 'Unfound Variant: Baseline Survival Probability of '+ DISEASES[tab],
+                'xaxis': {
+                    'title': 'Age',
+                    'type': 'linear' 
+                },
+                'yaxis' : {
+                    'title': 'Survival Probability',
+                    'type': 'linear' 
+                },
+            },}
+    
+    
             
 
-# @app.callback(
-#     Output(component_id='survival-plot', component_property='figure'),
-#     [Input(component_id='tabs', component_property='value'), 
-#     Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
-#     Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
-#     ])
-# def plot_survival_function(tab, gene, n_pos, alt, obese_hist, prs):
-#     if tab == "CAD":
-#         return {}
-#     phenotype_args = model.get_phenotypes(disease = 'BC')
-#     variant = model.id_variant(gene, n_pos, alt)
-#     var_args = model.get_variant_data(variant, disease= 'BC')
-#     baseline = model.get_baseline(disease= 'BC')
-#     if var_args == 'UNFOUND':
-#         survival_plot = fill_survival_func(tab, baseline)
-#     else:
-#         input_args = model.get_polygenetic_input('BC', obese_hist, gene, prs)
-#         survival_score = model.get_survival_prob(var_args, input_args, phenotype_args, disease = 'BC')
-#         survival_plot = fill_survival_func(tab, baseline, survival_score)
+@app.callback(
+    Output(component_id='survival-plot', component_property='figure'),
+    [Input(component_id='tabs', component_property='value'), 
+    Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
+    Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
+    ])
+def plot_survival_function(tab, gene, n_pos, alt, obese_hist, prs):
+    if tab == "CAD":
+        return {}
+    phenotype_args = model.get_phenotypes(disease = 'BC')
+    variant = model.id_variant(gene, n_pos, alt)
+    var_args = model.get_variant_data(variant, disease= 'BC')
+    baseline = model.get_baseline(disease= 'BC')
+    if var_args == 'UNFOUND':
+        survival_plot = fill_survival_func(tab, baseline)
+    else:
+        input_args = model.get_polygenetic_input('BC', obese_hist, gene, prs)
+        survival_score = model.get_survival_prob(var_args, input_args, phenotype_args, disease = 'BC')
+        survival_plot = fill_survival_func(tab, baseline, survival_score)
         
-#     return survival_plot 
+    return survival_plot 
     
 
 @app.callback(
