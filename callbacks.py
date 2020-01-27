@@ -1,8 +1,8 @@
 from dash.dependencies import Input, Output
 from app import app
 # import computation as model
-# import load_model as life_model
-# import numpy as np
+import load_model as life_model
+import numpy as np
 
 #############################################
 # Interaction Between Components / Controller
