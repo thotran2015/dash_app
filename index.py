@@ -48,7 +48,6 @@ api_url_ext = vep_server + reg_ext + reg_variant
 #1-156084729-G-A
 #1-156084750-C-T
 
-
 ###########################
 # Data Manipulation / Model
 ###########################
