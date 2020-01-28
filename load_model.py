@@ -23,9 +23,14 @@ def get_covariate_groups(model, covariate, val_range):
 
 def get_partial_hazard_ratio(model):
     axes = model.plot(hazard_ratios = True)
-    lines = axes.lines
+    covs = model.summary.index
+    lines = axes.get_lines()
+    #print(lines[0].get_data()[0])
+    vlines = pd.DataFrame([e.get_data()[0] for e in lines], columns = covs)
+    #print(pd.DataFrame(vlines, columns = covs))
     axes.clear()
-    return {i.get_label(): i.get_data() for i in lines}
+    return {col: sorted(vlines[col]) for col in vlines.columns}
+
 
 def load_model():
     with open("BRCA2_model.pickle", "rb") as input_file:

@@ -4,7 +4,7 @@ import computation as model
 import load_model as life_model
 import numpy as np
 
-from computation import get_callback, fill_survival_func
+from computation import get_callback, fill_survival_func, get_ph_ratios_callback
 
 #############################################
 # Interaction Between Components / Controller
@@ -35,7 +35,6 @@ def plot_covariates(tab, gene, n_pos, alt, obese_hist, prs):
 
 
     
-            
 
 @app.callback(
     Output(component_id='survival-plot-', component_property='figure'),
@@ -67,14 +66,14 @@ def update_output(value):
     return 'You have selected PRS of {}'.format(value)
 
 
-# @app.callback(
-#     Output(component_id='survival-plot-ph', component_property='figure'),
-#     [Input(component_id='tabs', component_property='value'), 
-#     Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
-#     Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
-#     ])
-# def plot_ph_ratios(tab, gene, n_pos, alt, obese_hist, prs):
-#     return {}
+@app.callback(
+    Output(component_id='ph-plot-', component_property='figure'),
+    [Input(component_id='tabs', component_property='value'), 
+    Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
+    Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
+    ])
+def plot_ph_ratios(tab, gene, n_pos, alt, obese_hist, prs):
+    return get_ph_ratios_callback(MODEL)()
     
     
 

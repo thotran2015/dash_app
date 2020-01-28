@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 from load_model import get_patient_profiles, fit_lifelines_model, get_covariate_groups, load_model, get_partial_hazard_ratio
-import plotly.graph_objs as go
+#import plotly.graph_objs as go
 
 
 ###########################
@@ -65,7 +65,8 @@ POLYGENETIC_OPTIONS = ['fam_hist', 'obese']
 DATA = get_patient_profiles('./data/patient_profiles.csv')
 MODEL = fit_lifelines_model(DATA)
 
-
+# print(MODEL.summary)
+# print(MODEL.summary.columns)
 
 def get_phenotypes(disease='BC', phenotype_file = PHENOTYPE_FILE):
     #df = access_dropbox_file(phenotype_file)
@@ -110,13 +111,6 @@ def get_polygenetic_input(disease, polygenetic_selected, gene_selected, prs=None
 #Process model input
 def process_model_input(var_args, input_args, phenotype_args, disease = 'BC'):
     all_args = {**var_args, **input_args, **phenotype_args}
-    # if disease == 'BC':
-    #     if 'PRS' in all_args:
-    #         all_args['gps_breastcancer'] = all_args['PRS']
-    # if disease == 'CC':
-    #     if 'PRS' in all_args:
-    #         all_args['gps_ibd'] = all_args['PRS']
-    #if disease =='CC':
     all_args['allele_frequency'] = -np.log10(float(all_args['allele_frequency']))
     if all_args['allele_frequency'] == 0.0:
         all_args['allele_frequency'] = 3e-6
@@ -136,9 +130,6 @@ def process_model_input(var_args, input_args, phenotype_args, disease = 'BC'):
     #print(df1)
     return df.drop(columns = ['Silent'])
 
-
-
-    #return np.asarray(data)
 
 def process_baseline_coef(disease='BC'):
     disease_model = DISEASE_MODELS[disease]
@@ -196,7 +187,8 @@ def fill_covariate_groups(cov, cov_data):
                      'title': 'Survival Probability',
                      'type': 'linear' 
                      },
-                 }}    
+                 }}  
+  
 def get_callback(cov, val_range, m = MODEL, get_cov_weights = get_covariate_groups):
  def plot_covariate_groups():
      covariate= cov
@@ -212,6 +204,7 @@ def get_callback(cov, val_range, m = MODEL, get_cov_weights = get_covariate_grou
  return plot_covariate_groups
 
 
+
 def fill_ph_ratios_plot(ph_data):
     return {'data': ph_data,
              'layout': { 
@@ -219,30 +212,37 @@ def fill_ph_ratios_plot(ph_data):
                  'xaxis': {
                      'title': 'HR',
                      'type': 'linear' 
+
                      },
                  'yaxis' : {
-                     'type': 'linear' 
+                     'type': 'category' 
+
                      },
                  }} 
     
 
-def get_ph_ratios_callback():
-    def plot_box_plot_coef(model= MODEL):
-        ph_ratios= get_partial_hazard_ratio(model)['_nolegend_']
-        trace0 = go.Box(
-            y=ph_ratios[0]
-        )
-        trace1 = go.Box(
-            y=ph_ratios[1]
-        )
-        ph_data = [trace0, trace1]
+def get_ph_ratios_callback(model= MODEL):
+    def plot_box_plot_coef():
+        ph_ratios = get_partial_hazard_ratio(model)
+        #print(len(ph_ratios))
+        ph_data = [
+          {'x': xy, 'y': [i]*len(xy), 'type': 'line', 'name': i, 'mode':'lines+markers',
+              } for i, xy in ph_ratios.items()
+          ]
+        for i, xy in ph_ratios.items():
+            ph_data.append({'x': [xy[1]], 'y': [i], 'type': 'scatter', 'name': i, 'mode':'markers', 
+                            'marker': {'size': 10
+                                },
+              } )
+            
+        
         return fill_ph_ratios_plot(ph_data)
     return plot_box_plot_coef
     
     
 
-
-print(get_partial_hazard_ratio(MODEL))
+#print(MODEL.hazard_ratios_)
+#get_partial_hazard_ratio(MODEL)
 # baseline, coef = process_baseline_coef('BC')
 # print(coef*10)
 

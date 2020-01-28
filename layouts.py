@@ -57,8 +57,20 @@ def setup_ph_plot(id):
                                                # 'sendDataToCloud',
                                                'resetScale2d']
             }), 
-            style = {'width': '50%', 'display': 'inline-block' }
+            #style = {'width': '50%', 'display': 'inline-block' }
             )
+
+def setup_prs_slider(id = 'prs-slider', range_val = (-5,5,0.1)):
+    min, max, step = range_val
+    return dcc.Slider(
+      id = id,
+      min= min,
+      max= max,
+      step = step,
+      #marks={i: str(i) for i in range(-5,6)},
+      marks={i/2: str(i/2) for i in range(-10,12)},
+      value=0,
+    )
 
 COVARIATES = ['PRS', 'Family History','log Allele Frequency', 'type']
 cov_plot_layout = [setup_covariate_plot(cov)
@@ -75,7 +87,6 @@ layout2 = html.Div( children =[
             {'label': 'BRCA 1', 'value': 'BRCA1'},
             {'label': 'BRCA 2', 'value': 'BRCA2'}]),
 
-
     html.Label('Nucleotide Position (e.g. 41197701)'),
     dcc.Input(id= 'n_pos', value = 41197701, type = 'number'),
 
@@ -83,28 +94,13 @@ layout2 = html.Div( children =[
     dcc.Input(id= 'alt', value = 'G-A' , type = 'text'),
 
     html.Label('Basic Health Info: Check if you have'),
-    html.Div(
-      #style={'width':'10%', 'height':'100%','float':'left'},
-      children = [
-          dcc.Checklist(
-            id= 'obese-hist',
-            options = [
-            {'label': 'Severe obsesity', 'value': 'obese'},
-            {'label': 'Family history', 'value': 'fam_his'}],
-            value = ['default'],
-            labelStyle = {'display': 'block'}),
-      ]),
+    setup_polygenetic_checklist('obese-hist'),
+    
     html.Div(id='prs'),
-    dcc.Slider(
-      id = 'prs-slider',
-      min=-5,
-      max=5,
-      step = 0.1,
-      #marks={i: str(i) for i in range(-5,6)},
-      marks={i/2: str(i/2) for i in range(-10,12)},
-      value=0,
-    ),
+    setup_prs_slider(),
+    
     setup_survival_plot(''),
+    
     setup_ph_plot(''),
 
     html.Div(
