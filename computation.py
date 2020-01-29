@@ -236,7 +236,6 @@ def get_ph_ratios_error_callback(model= MODEL):
 def get_ph_ratios_callback(model= MODEL):
     def plot_box_plot_coef():
         ph_ratios = get_partial_hazard_ratio(model)
-        print(ph_ratios)
         ph_data = [
           {'x': xy, 'y': [i]*len(xy), 'type': 'scatter', 'name': i, 'mode':'lines+markers',
               } for i, xy in ph_ratios.items()

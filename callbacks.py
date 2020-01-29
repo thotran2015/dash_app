@@ -96,13 +96,20 @@ def request_var_data(variant):
     ##opt_par ='?CADD=1?'
     api_url = vep_server+ext+variant
     api_url_ext = vep_server + reg_ext + reg_variant
-    r = requests.get(api_url, headers={ "Content-Type" : "application/json"}, verify=False, timeout= 10)
-    if not r.ok:
-        r.raise_for_status()
-        sys.exit()
-        return "No data or timeout"
-    decoded = r.json()[0]
-    return decoded['id']
+    try:
+        r = requests.get(api_url, headers={ "Content-Type" : "application/json"}, verify=False, timeout=5)
+        if not r.ok:
+            r.raise_for_status()
+            sys.exit()
+            return "Bad request"
+        decoded = r.json()[0]
+        return decoded['id'], decoded['most_severe_consequence']
+    except requests.exceptions.Timeout:
+        return "timeout"
+    
+
+        
+
     
 @app.callback(
     Output(component_id='test-output', component_property='children'),
@@ -113,6 +120,10 @@ def request_var_data(variant):
 def get_variant_data(tab, gene, n_pos, alt, obese_hist, prs):
     #yield 'Please wait'
     variant = '1:g.156084756C>T'
+    # for i in range(10):
+    #     yield 'Please wait'
+    #     yield request_var_data(variant)
+        
     
 
     return request_var_data(variant)
