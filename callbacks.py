@@ -78,13 +78,10 @@ def plot_ph_ratios(tab, gene, n_pos, alt, obese_hist, prs):
     
     
 
-@app.callback(
-    Output(component_id='test-output', component_property='children'),
-    [Input(component_id='tabs', component_property='value'), 
-    Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
-    Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
-    ])
-def get_variant_data(tab, gene, n_pos, alt, obese_hist, prs):
+
+
+
+def request_var_data(variant):
     vep_server = "https://rest.ensembl.org"
     ext = "/vep/human/hgvs/"
     reg_ext = "/vep/human/region/"
@@ -92,20 +89,33 @@ def get_variant_data(tab, gene, n_pos, alt, obese_hist, prs):
     ##
     ###"1:6524705:6524705/T?"
     #s_variant = '9:g.22125504G>C'
-    variant = '1:g.156084756C>T'
+    #variant = '1:g.156084756C>T'
     reg_variant = "1:156084756:156084756:1/A"
     #'1:g.156084729G>A'
     ##AGT:c.803T>C
     ##opt_par ='?CADD=1?'
     api_url = vep_server+ext+variant
     api_url_ext = vep_server + reg_ext + reg_variant
-    r = requests.get(api_url, headers={ "Content-Type" : "application/json"})
+    r = requests.get(api_url, headers={ "Content-Type" : "application/json"}, verify=False, timeout= 10)
     if not r.ok:
         r.raise_for_status()
         sys.exit()
-
+        return "No data or timeout"
     decoded = r.json()[0]
     return decoded['id']
+    
+@app.callback(
+    Output(component_id='test-output', component_property='children'),
+    [Input(component_id='tabs', component_property='value'), 
+    Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
+    Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
+    ])
+def get_variant_data(tab, gene, n_pos, alt, obese_hist, prs):
+    #yield 'Please wait'
+    variant = '1:g.156084756C>T'
+    
+
+    return request_var_data(variant)
             
 
 
