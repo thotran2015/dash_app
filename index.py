@@ -12,18 +12,18 @@ import callbacks
 import requests
 import sys
 
-import rpy2
-import rpy2.robjects as robjects
-from rpy2.robjects.packages import importr
-# import R's "base" package
-base = importr('base')
-# import R's "utils" package
-utils = importr('utils')
-# select a mirror for R packages
-#utils.chooseCRANmirror(ind=1) # select the first mirror in the list
-# R package names
-#packnames = ('ggplot2', 'hexbin')
-survival = importr('survival')
+# import rpy2
+# import rpy2.robjects as robjects
+# from rpy2.robjects.packages import importr
+# # import R's "base" package
+# base = importr('base')
+# # import R's "utils" package
+# utils = importr('utils')
+# # select a mirror for R packages
+# #utils.chooseCRANmirror(ind=1) # select the first mirror in the list
+# # R package names
+# #packnames = ('ggplot2', 'hexbin')
+# survival = importr('survival')
 #print(survival.coxph())
 
 
