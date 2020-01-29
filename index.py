@@ -9,8 +9,22 @@ from app import app, server
 from layouts import layout1, layout2, layout3
 import callbacks
 #from computation import get_survival_prob
+import requests
+import sys
 
-
+import rpy2
+import rpy2.robjects as robjects
+from rpy2.robjects.packages import importr
+# import R's "base" package
+base = importr('base')
+# import R's "utils" package
+utils = importr('utils')
+# select a mirror for R packages
+#utils.chooseCRANmirror(ind=1) # select the first mirror in the list
+# R package names
+#packnames = ('ggplot2', 'hexbin')
+survival = importr('survival')
+#print(survival.coxph())
 
 
 
@@ -32,7 +46,7 @@ reg_ext = "/vep/human/region/"
 ##reg_variant = "1:156084729:156084729:1/A"
 ##
 ###"1:6524705:6524705/T?"
-##s_variant = '9:g.22125504G>C'
+#s_variant = '9:g.22125504G>C'
 variant = '1:g.156084756C>T'
 reg_variant = "1:156084756:156084756:1/A"
 #'1:g.156084729G>A'
@@ -85,17 +99,16 @@ def render_tab_title(tab):
     elif tab == 'CC':
         return layout2
 
-    #server = app.server
-    # print('url', api_url)
-    # r = requests.get(api_url, headers={ "Content-Type" : "application/json"})
-    # if not r.ok:
-    #     r.raise_for_status()
-    #     sys.exit()
- 
-    # decoded = r.json()
-    # print(repr(decoded))
     
 # start Flask server
 if __name__ == '__main__':
+    print('url:', api_url)
+    r = requests.get(api_url, headers={ "Content-Type" : "application/json"})
+    if not r.ok:
+         r.raise_for_status()
+         sys.exit()
+ 
+    decoded = r.json()[0]
+    #print(repr(decoded))
     app.run_server(debug = True)
 

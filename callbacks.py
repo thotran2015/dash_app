@@ -3,6 +3,7 @@ from app import app
 import computation as model
 import load_model as life_model
 import numpy as np
+import requests, sys
 
 from computation import get_callback, fill_survival_func, get_ph_ratios_callback
 
@@ -27,7 +28,7 @@ COV_OUTPUTS = [Output('covariate-plot-'+cov, 'figure') for cov in COVARIATES]
       Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
       Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')]
  )
-def plot_covariates(tab, gene, n_pos, alt, obese_hist, prs):
+def plot_covariates(tab, gene, n_pos, alt, obese_hist,  s):
  data = [get_callback(cov, val_range)() for cov, val_range in COVARIATES.items()]
  return data
 
@@ -77,6 +78,48 @@ def plot_ph_ratios(tab, gene, n_pos, alt, obese_hist, prs):
     
     
 
+@app.callback(
+    Output(component_id='test-output', component_property='children'),
+    [Input(component_id='tabs', component_property='value'), 
+    Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
+    Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
+    ])
+def get_variant_data(tab, gene, n_pos, alt, obese_hist, prs):
+    vep_server = "https://rest.ensembl.org"
+    ext = "/vep/human/hgvs/"
+    reg_ext = "/vep/human/region/"
+    ##reg_variant = "1:156084729:156084729:1/A"
+    ##
+    ###"1:6524705:6524705/T?"
+    #s_variant = '9:g.22125504G>C'
+    variant = '1:g.156084756C>T'
+    reg_variant = "1:156084756:156084756:1/A"
+    #'1:g.156084729G>A'
+    ##AGT:c.803T>C
+    ##opt_par ='?CADD=1?'
+    api_url = vep_server+ext+variant
+    api_url_ext = vep_server + reg_ext + reg_variant
+    r = requests.get(api_url, headers={ "Content-Type" : "application/json"})
+    if not r.ok:
+        r.raise_for_status()
+        sys.exit()
+
+    decoded = r.json()[0]
+    return decoded['id']
+            
+
+
+
+
+# def get_checklists(tab, gene, n_pos, alt, obese_hist, prs):
+#     phenotype_args = model.get_phenotypes(disease = tab)
+#     variant = model.id_variant(gene, n_pos, alt)
+#     var_args = model.get_variant_data(variant)
+#     #var_args = model.get_variant_data(gene, n_pos, alt, disease = tab) 
+#     input_args = model.get_polygenetic_input(tab, obese_hist, gene, prs)
+
+#     #survival_score = model.survival_rate(var_args, input_args, phenotype_args)
+#     return list(input_args.values())
 
 
 

@@ -25,9 +25,10 @@ def get_partial_hazard_ratio(model):
     axes = model.plot(hazard_ratios = True)
     covs = model.summary.index
     lines = axes.get_lines()
-    #print(lines[0].get_data()[0])
     vlines = pd.DataFrame([e.get_data()[0] for e in lines], columns = covs)
-    #print(pd.DataFrame(vlines, columns = covs))
+    vlines['data_labels'] = ['target', 'lower_bound', 'upper_bound']
+    
+    vlines = vlines.set_index('data_labels')
     axes.clear()
     return {col: sorted(vlines[col]) for col in vlines.columns}
 
