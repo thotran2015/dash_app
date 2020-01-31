@@ -37,7 +37,7 @@ import sys
 # set params
 ##DATABASE_URL = 'postgres://duozofkhzsfjvy:46ef1e44c2b9751801126174b41e124a7f1c847b9e0cf2f27af49a0a3278d5db@ec2-54-235-89-123.compute-1.amazonaws.com:5432/da1e3uq86ab5tu'
 ###conn = create_engine(DATABASE_URL)
-vep_server = "https://rest.ensembl.org"
+vep_server =  "https://grch37.rest.ensembl.org/"
 ##
 ##
 ext = "/vep/human/hgvs/"
@@ -47,7 +47,8 @@ reg_ext = "/vep/human/region/"
 ##
 ###"1:6524705:6524705/T?"
 #s_variant = '9:g.22125504G>C'
-variant = '1:g.156084756C>T'
+#variant = '1:g.156084756C>T'
+variant = '17:g.41197701G>A'
 reg_variant = "1:156084756:156084756:1/A"
 #'1:g.156084729G>A'
 ##AGT:c.803T>C

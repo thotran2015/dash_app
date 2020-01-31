@@ -60,9 +60,10 @@ POLYGENETIC_OPTIONS = ['fam_hist', 'obese']
 
 
 DATA = get_patient_profiles('./data/patient_profiles.csv')
+#MODEL = load_model()
 MODEL = fit_lifelines_model(DATA)
 
-#print(MODEL.standard_errors_)
+print(MODEL.summary)
 
 def get_phenotypes(disease='BC', phenotype_file = PHENOTYPE_FILE):
     #df = access_dropbox_file(phenotype_file)
@@ -88,6 +89,10 @@ def get_variant_data(var_name, disease='BC', variant_file = VARIANT_FILE):
         var_args[VAR_PAR[0]]= row.iloc[0][VAR_PAR[0]]
         return var_args
     return 'UNFOUND'
+
+def get_variant_info(var_name, disease='BC', model= MODEL):
+    covs = model.summary.index
+    return 
   
 
 # Retrieve Polygenetic Input from user
@@ -139,8 +144,6 @@ def get_survival_prob(var_args, input_args, phenotype_args, disease='BC'):
     baseline, coef = process_baseline_coef(disease)
     model = load_model()
     return model.predict_survival_function(data)['patient'].to_dict()
-    #prod = math.exp(np.sum(coef.to_numpy()*data))
-    #return {age: prob*prod for age, prob in baseline.to_dict().items()}
 
 def fill_survival_func(tab, baseline, survival_score = None):
     data = [
@@ -153,7 +156,7 @@ def fill_survival_func(tab, baseline, survival_score = None):
     return {
         'data': data,
         'layout': {
-                'title': 'Unfound Variant: Baseline Survival Probability of '+ DISEASES[tab],
+                'title': 'Survival Probability of '+ DISEASES[tab],
                 'xaxis': {
                     'title': 'Age',
                     'type': 'linear' 
@@ -166,91 +169,89 @@ def fill_survival_func(tab, baseline, survival_score = None):
     
 def get_plot_layout(title, xlabel, ylabel):
     return { 
-                    'title' : title,
-                    'xaxis': {
-                        'title': xlabel,
-                        'type': 'linear' 
-                        },
-                    'yaxis' : {
-                        'title': ylabel,
-                        'type': 'linear' 
-                        },
-                    }
-    
-def fill_covariate_groups(cov_data, layout):
-    return {'data': cov_data,
-            'layout': layout
-            }  
+            'title' : title,
+            'xaxis': {
+                'title': xlabel,
+                'type': 'linear' 
+                },
+            'yaxis' : {
+                'title': ylabel,
+                'type': 'linear' 
+                },
+            }
+
+
   
 def get_callback(cov, val_range, m = MODEL, get_cov_weights = get_covariate_groups):
- def plot_covariate_groups():
-     covariate= cov
-     if cov =='type':
-         covariate= ['Missense', 'Nonsense', 'Frameshift', 'Insertion/Deletion', 'Other']
+    covariate= cov
+    if cov =='type':
+        covariate= ['Missense', 'Nonsense', 'Frameshift', 'Insertion/Deletion', 'Other']
+    covariate_groups = get_cov_weights(m, covariate, val_range= val_range)
+    def fill_covariate_groups(cov_data, layout):
+        return {'data': cov_data,
+                'layout': layout
+                }  
+    def plot_covariate_groups():
+        cov_data = [
+             {'x': xy[0], 'y': xy[1], 'type': 'line', 'name': label, }
+             for i, (label, xy) in enumerate(covariate_groups.items())
+             ]
+        layout = get_plot_layout('Survival based on '+ cov, 'Age', 'HR')
+        return fill_covariate_groups(cov_data,layout)
+    return plot_covariate_groups
 
-     covariate_groups = get_cov_weights(m, covariate, val_range= val_range)
-     cov_data = [
-          {'x': xy[0], 'y': xy[1], 'type': 'line', 'name': label, }
-          for i, (label, xy) in enumerate(covariate_groups.items())
-          ]
-     layout = get_plot_layout('Survival based on '+ cov, 'Age', 'HR')
-     return fill_covariate_groups(cov_data,layout)
- return plot_covariate_groups
 
 
 
-def fill_ph_ratios_plot(ph_data):
-    return {'data': ph_data,
-             'layout': { 
-                 'title' : 'Partial Hazard Ratio ',
-                 'xaxis': {
-                     'title': 'HR',
-                     'type': 'linear' 
+def get_ph_ratios_callback(model= MODEL, get_partial_hazard_ratio = get_partial_hazard_ratio):
+    ph_ratios = get_partial_hazard_ratio(model)
+    print('ph ratios')
+    print(ph_ratios)
+    def fill_ph_ratios_plot(ph_data):
+        return {'data': ph_data,
+                 'layout': { 
+                     'title' : 'Partial Hazard Ratio ',
+                     'xaxis': {
+                         'title': 'HR',
+                         'type': 'linear' 
+        
+                         },
+                     'yaxis' : {
+                         'type': 'category' 
+        
+                         },
+                     }} 
 
-                     },
-                 'yaxis' : {
-                     'type': 'category' 
-
-                     },
-                 }} 
-
-def get_ph_ratios_error_callback(model= MODEL):
-    def plot_box_plot_coef():
-        ph_ratios = get_partial_hazard_ratio(model)
-        print(ph_ratios)
+    def plot_box_plot_coef(covs = ['PRS', 'CADD', 'log Allele Frequency']):
         ph_data = [
           {'x': xy, 'y': [i]*len(xy), 'type': 'scatter', 'name': i, 'mode':'lines+markers',
-              } for i, xy in ph_ratios.items()
+              } for i, xy in ph_ratios.items() if i in covs
           ]
-        # for i, xy in ph_ratios.items():
-        #     ph_data.append({'x': [xy[1]], 'y': [i], 'type': 'scatter', 'name': i, 'mode':'markers', 
-        #                     'marker': {'size': 10
-        #                         },
-        #       } )
-            
-        
-        return fill_ph_ratios_plot(ph_data)
-    return plot_box_plot_coef
-            
-
-def get_ph_ratios_callback(model= MODEL):
-    def plot_box_plot_coef():
-        ph_ratios = get_partial_hazard_ratio(model)
-        ph_data = [
+        ph_data1 = [
           {'x': xy, 'y': [i]*len(xy), 'type': 'scatter', 'name': i, 'mode':'lines+markers',
-              } for i, xy in ph_ratios.items()
+              } for i, xy in ph_ratios.items() if i in ['Missense', 'Nonsense', 'Frameshift', 'Insertion/Deletion']
           ]
-        # for i, xy in ph_ratios.items():
-        #     ph_data.append({'x': [xy[1]], 'y': [i], 'type': 'scatter', 'name': i, 'mode':'markers', 
-        #                     'marker': {'size': 10
-        #                         },
-        #       } )
-            
-        
-        return fill_ph_ratios_plot(ph_data)
+        return fill_ph_ratios_plot(ph_data), fill_ph_ratios_plot(ph_data1)
     return plot_box_plot_coef
     
     
+# def get_ph_ratios_error_callback(model= MODEL):
+#     def plot_box_plot_coef():
+#         ph_ratios = get_partial_hazard_ratio(model)
+#         print(ph_ratios)
+#         ph_data = [
+#           {'x': xy, 'y': [i]*len(xy), 'type': 'scatter', 'name': i, 'mode':'lines+markers',
+#               } for i, xy in ph_ratios.items()
+#           ]
+#         # for i, xy in ph_ratios.items():
+#         #     ph_data.append({'x': [xy[1]], 'y': [i], 'type': 'scatter', 'name': i, 'mode':'markers', 
+#         #                     'marker': {'size': 10
+#         #                         },
+#         #       } )
+            
+        
+#         return fill_ph_ratios_plot(ph_data)
+#     return plot_box_plot_coef
 
 #print(MODEL.hazard_ratios_)
 #get_partial_hazard_ratio(MODEL)

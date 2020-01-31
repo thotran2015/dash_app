@@ -6,6 +6,7 @@ import numpy as np
 import requests, sys
 
 from computation import get_callback, fill_survival_func, get_ph_ratios_callback
+from process_input import request_var_data, format_variant_id
 
 #############################################
 # Interaction Between Components / Controller
@@ -13,12 +14,10 @@ from computation import get_callback, fill_survival_func, get_ph_ratios_callback
 
 #generate tab
 DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary Artery Disease'}
-DATA = life_model.get_patient_profiles('./data/patient_profiles.csv')
-MODEL = life_model.fit_lifelines_model(DATA)
-# #MODEL = life_model.load_model()
 COVARIATES = {'PRS':np.arange(-5, 6, 5), 'Family History': np.arange(0,2), 'log Allele Frequency':np.arange(-6,2, 2), 'type': np.eye(5)}
 COV_OUTPUTS = [Output('covariate-plot-'+cov, 'figure') for cov in COVARIATES] 
 
+GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 9, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
 
 
 
@@ -28,9 +27,9 @@ COV_OUTPUTS = [Output('covariate-plot-'+cov, 'figure') for cov in COVARIATES]
       Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
       Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')]
  )
-def plot_covariates(tab, gene, n_pos, alt, obese_hist,  s):
- data = [get_callback(cov, val_range)() for cov, val_range in COVARIATES.items()]
- return data
+def plot_covariates(tab, gene, n_pos, alt, obese_hist,  prs):
+    data = [get_callback(cov, val_range)() for cov, val_range in COVARIATES.items()]
+    return data
 
     
 
@@ -66,46 +65,28 @@ def plot_survival_function(tab, gene, n_pos, alt, obese_hist, prs):
 def update_output(value):
     return 'You have selected PRS of {}'.format(value)
 
+# Output(component_id='ph-plot-2', component_property='figure')
 
 @app.callback(
-    Output(component_id='ph-plot-', component_property='figure'),
+    [Output(component_id='ph-plot-1', component_property='figure'), Output(component_id='ph-plot-2', component_property='figure')],
     [Input(component_id='tabs', component_property='value'), 
     Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
-    Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
+    Input(component_id='obese-hist', component_property='value')
     ])
-def plot_ph_ratios(tab, gene, n_pos, alt, obese_hist, prs):
-    return get_ph_ratios_callback(MODEL)()
+def plot_ph_ratios(tab, gene, n_pos, alt, obese_hist):
+    p1,p2 = get_ph_ratios_callback()()
+    
+    #p2 = get_ph_ratios_callback()()
+    print('p1')
+    print(p1)
+    return [p1,p2]
     
     
 
 
 
 
-def request_var_data(variant):
-    vep_server = "https://rest.ensembl.org"
-    ext = "/vep/human/hgvs/"
-    reg_ext = "/vep/human/region/"
-    ##reg_variant = "1:156084729:156084729:1/A"
-    ##
-    ###"1:6524705:6524705/T?"
-    #s_variant = '9:g.22125504G>C'
-    #variant = '1:g.156084756C>T'
-    reg_variant = "1:156084756:156084756:1/A"
-    #'1:g.156084729G>A'
-    ##AGT:c.803T>C
-    ##opt_par ='?CADD=1?'
-    api_url = vep_server+ext+variant
-    api_url_ext = vep_server + reg_ext + reg_variant
-    try:
-        r = requests.get(api_url, headers={ "Content-Type" : "application/json"}, verify=False, timeout=5)
-        if not r.ok:
-            r.raise_for_status()
-            sys.exit()
-            return "Bad request"
-        decoded = r.json()[0]
-        return decoded['id'], decoded['most_severe_consequence']
-    except requests.exceptions.Timeout:
-        return "timeout"
+    
     
 
         
@@ -118,17 +99,22 @@ def request_var_data(variant):
     Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
     ])
 def get_variant_data(tab, gene, n_pos, alt, obese_hist, prs):
+    
+    #user input variant id
+    var_id = format_variant_id(gene, n_pos, alt, gene_to_chrom = GENE_TO_CHROM, ens = ':g.')
     #yield 'Please wait'
-    variant = '1:g.156084756C>T'
+    #variant = '1:g.156084756C>T'
+    #variant = '1:g.156084756T'
+    variant = '17:g.41197701G>A'
+    ext_variant = "1:156084756:156084756:1/A"
     # for i in range(10):
     #     yield 'Please wait'
     #     yield request_var_data(variant)
-        
-    
 
-    return request_var_data(variant)
-            
+    out = request_var_data(variant)['most_severe_consequence']
 
+
+    return out
 
 
 
