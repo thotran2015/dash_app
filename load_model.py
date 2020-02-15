@@ -15,7 +15,7 @@ def fit_lifelines_model(data):
  	return model 
 
 def get_covariate_groups(model, covariate, val_range):
-    axes2 = model.plot_covariate_groups(covariate, values=val_range, cmap='coolwarm', label = 'covs')
+    axes2 = model.plot_covariate_groups(covariate, values=val_range, cmap='coolwarm', label = 'covs', plot_baseline=False)
     lines = axes2.get_lines()
     axes2.clear()
     return {i.get_label(): i.get_data() for i in lines}
@@ -31,11 +31,11 @@ def get_partial_hazard_ratio(model):
     return {col: list(df[col].values) for col in df.columns}
 
 
-def load_model():
-    with open("BRCA2_model.pickle", "rb") as input_file:
+def load_model(model_loc):
+    with open(model_loc, "rb") as input_file:
         model = pickle.load(input_file) 
-        #hr_axes =  model.plot(hazard_ratios = True)
-        
+        print(model.summary.index)
+        print(model.summary.columns)
         return model
 
 #with open("BRCA2_model.pickle", "rb") as input_file:

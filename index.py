@@ -88,8 +88,7 @@ app.layout = html.Div(children =[
 #############################################
 # Interaction Between Components / Controller
 #############################################
-
- # Set menu tabs
+  # Set menu tabs
 @app.callback(Output(component_id = 'page-content', component_property = 'children'), 
                  [Input(component_id = 'tabs', component_property = 'value')])
 def render_tab_title(tab):
@@ -103,13 +102,13 @@ def render_tab_title(tab):
     
 # start Flask server
 if __name__ == '__main__':
-    print('url:', api_url)
-    r = requests.get(api_url, headers={ "Content-Type" : "application/json"})
-    if not r.ok:
-         r.raise_for_status()
-         sys.exit()
+    # print('url:', api_url)
+    # r = requests.get(api_url, headers={ "Content-Type" : "application/json"})
+    # if not r.ok:
+    #      r.raise_for_status()
+    #      sys.exit()
  
-    decoded = r.json()[0]
+    # decoded = r.json()[0]
     #print(repr(decoded))
     app.run_server(debug = True)
 

@@ -59,12 +59,13 @@ DISEASE_MODELS = {'BC': BC_MODEL, 'CC': CC_MODEL, 'CAD': CAD_MODEL}
 POLYGENETIC_OPTIONS = ['fam_hist', 'obese']
 
 
-DATA = get_patient_profiles('./data/patient_profiles.csv')
-#MODEL = load_model()
-MODEL = fit_lifelines_model(DATA)
+# DATA = get_patient_profiles('./data/patient_profiles.csv')
+# #MODEL = load_model()
+# MODEL = fit_lifelines_model(DATA)
 
-print(MODEL.summary)
-
+ #print(MODEL.summary.index)
+#model_loc = './models/BRCA2_10_31.pickle'
+#load_model(model_loc)
 def get_phenotypes(disease='BC', phenotype_file = PHENOTYPE_FILE):
     #df = access_dropbox_file(phenotype_file)
     df = pd.read_json(phenotype_file)
@@ -75,6 +76,8 @@ def get_phenotypes(disease='BC', phenotype_file = PHENOTYPE_FILE):
 
 
 def id_variant(gene, n_pos, alt, gene_to_chrom = GENE_TO_CHROM):
+    #'17:g.41197701G>A'
+    #return str(gene_to_chrom[gene]) + ':g.' + str(n_pos) + alt
 	return str(gene_to_chrom[gene]) + '-' + str(n_pos) + '-' + alt
 
 # Obtain Variant Info
@@ -90,10 +93,6 @@ def get_variant_data(var_name, disease='BC', variant_file = VARIANT_FILE):
         return var_args
     return 'UNFOUND'
 
-def get_variant_info(var_name, disease='BC', model= MODEL):
-    covs = model.summary.index
-    return 
-  
 
 # Retrieve Polygenetic Input from user
 def get_polygenetic_input(disease, polygenetic_selected, gene_selected, prs=None):
@@ -205,8 +204,6 @@ def get_callback(cov, val_range, m = MODEL, get_cov_weights = get_covariate_grou
 
 def get_ph_ratios_callback(model= MODEL, get_partial_hazard_ratio = get_partial_hazard_ratio):
     ph_ratios = get_partial_hazard_ratio(model)
-    print('ph ratios')
-    print(ph_ratios)
     def fill_ph_ratios_plot(ph_data):
         return {'data': ph_data,
                  'layout': { 

@@ -22,21 +22,7 @@ def setup_polygenetic_checklist(id):
             value = ['default'],
             labelStyle = {'display': 'block'}),
       ])
-def setup_covariate_plot(id):
-    return html.Div( 
-            dcc.Graph(
-            id='covariate-plot-'+id,
-            config={
-                    'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
-                                               'pan2d', 'toggleSpikelines',
-                                               'hoverCompareCartesian',
-                                               'zoomOut2d', 'zoomIn2d',
-                                               'hoverClosestCartesian',
-                                               # 'sendDataToCloud',
-                                               'resetScale2d']
-            }), 
-            style = {'width': '50%', 'display': 'inline-block' }
-            )
+
 def setup_survival_plot(id):
     return dcc.Graph(
         id='survival-plot-'+id,
@@ -47,7 +33,8 @@ def setup_survival_plot(id):
                                            'zoomOut2d', 'zoomIn2d',
                                            'hoverClosestCartesian',
                                            # 'sendDataToCloud',
-                                           'resetScale2d']
+                                           'resetScale2d'],
+               
         })
     
 def setup_ph_plot(id):
@@ -62,6 +49,23 @@ def setup_ph_plot(id):
                                                'hoverClosestCartesian',
                                                # 'sendDataToCloud',
                                                'resetScale2d']
+            }), 
+            style = {'width': '25%', 'display': 'inline-block' }
+            )
+
+def setup_covariate_plot(id):
+    return html.Div( 
+            dcc.Graph(
+            id='covariate-plot-'+id,
+            config={
+                    'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
+                                               'pan2d', 'toggleSpikelines',
+                                               'hoverCompareCartesian',
+                                               'zoomOut2d', 'zoomIn2d',
+                                               'hoverClosestCartesian',
+                                               # 'sendDataToCloud',
+                                               'resetScale2d'],
+                   
             }), 
             style = {'width': '50%', 'display': 'inline-block' }
             )

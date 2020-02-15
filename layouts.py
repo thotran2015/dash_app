@@ -25,7 +25,7 @@ layout2 = html.Div( children =[
     dcc.Input(id= 'n_pos', value = 41197701, type = 'number'),
 
     html.Label('Alteration: Reference -> Mutation (e.g. G-A)'),
-    dcc.Input(id= 'alt', value = 'G-A' , type = 'text'),
+    dcc.Input(id= 'alt', value = 'G>A' , type = 'text'),
 
     html.Label('Basic Health Info: Check if you have'),
     setup_polygenetic_checklist('obese-hist'),
@@ -95,7 +95,7 @@ layout3 = html.Div(children =[
                                            'zoomOut2d', 'zoomIn2d',
                                            'hoverClosestCartesian',
                                            # 'sendDataToCloud',
-                                           'resetScale2d']
+                                           'resetScale2d'],
         }),
 
     
