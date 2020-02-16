@@ -36,6 +36,8 @@ layout2 = html.Div( children =[
     setup_survival_plot(''),
     setup_ph_plot('1'),
     setup_ph_plot('2'),
+    setup_ph_plot('3'),
+    setup_ph_plot('4'),
 
     html.Div(
         cov_plot_layout,

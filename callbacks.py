@@ -6,7 +6,7 @@ import numpy as np
 
 
 #from computation import get_callback, fill_survival_func, get_ph_ratios_callback
-#from process_input import request_var_data, extract_counters, extract_var_covs
+from process_input import process_model_input
 from callbacks_util import load_model, get_covariate_grps_callback, get_ph_ratios_callback, get_survival_callback
 
 #############################################
@@ -43,8 +43,8 @@ MODEL = load_model(model_loc)
     Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
     Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
     ])
-def plot_survival_function(tab, gene, n_pos, alt, obese_hist, prs, model = MODEL):
-    return get_survival_callback(tab, model)()
+def plot_survival_function(dis_tab, gene, n_pos, alt, obese_hist, prs, model = MODEL):
+    return get_survival_callback(dis_tab, gene, n_pos, alt, obese_hist, prs, model)()
     
 
 @app.callback(
@@ -61,14 +61,14 @@ def update_output(value):
 
 
 @app.callback(
-    [Output(component_id='ph-plot-1', component_property='figure'), Output(component_id='ph-plot-2', component_property='figure')],
+    [Output(component_id='ph-plot-1', component_property='figure'), Output(component_id='ph-plot-2', component_property='figure'),
+     Output(component_id='ph-plot-3', component_property='figure'), Output(component_id='ph-plot-4', component_property='figure')],
     [Input(component_id='tabs', component_property='value'), 
     Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
     Input(component_id='obese-hist', component_property='value')
     ])
 def plot_ph_ratios(tab, gene, n_pos, alt, obese_hist):
-    p1, p2 = get_ph_ratios_callback(MODEL)()
-    return [p1,p2]
+    return get_ph_ratios_callback(MODEL)()
     
     
 

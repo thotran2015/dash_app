@@ -15,18 +15,19 @@ GENE_TO_DISEASE = {'BC': ['BRCA1', 'BRCA2'], 'CC': ['MSH2', 'MSH6', 'PMS2', 'MLH
 MUTATION_TYPES = {'synonymous_variant':'Silent', 'missense_variant': 'Missense', 'nonsense_variant':'Nonsense'}
 CONSEQ = {"Silent", "Nonsense", "Missense", "Deletion", "Frameshift", "Insertion/Deletion"}
 
-POLYGENETIC_OPTIONS = ['fam_hist', 'obese']
+POLYGENETIC_OPTIONS = ['Family History', 'obese']
 
-BREAST_PAR = ['Nonsense', 'Frameshift', 'Insertion/Deletion', 'Silent', 'Transition',
+BC_PAR = ['log Allele Frequency', 'Phylop', 'GERP', 'CADD', 'Missense',
+       'Nonsense', 'Frameshift', 'Insertion/Deletion', 'Silent', 'Transition',
        'Transversion', 'CpG Removing', 'CpG Creating', 'Splice Affecting',
        'PRS', 'PC1', 'PC2', 'PC3', 'PC4', 'Family History', 'Region 1',
        'Region 2', 'Region 3', 'Region 4', 'Region 5']
-#["gps_breastcancer", "fam_hist", "allele_frequency", "Silent", "Nonsense", "Missense", "Deletion", "Frameshift"]
+
 COLREC_PAR = [ "PRS", "MSH2", "MSH6" , "MLH1" , "PMS2" , "fam_hist" , "allele_frequency" , "PC1" , "PC2" , "PC3" ,
     "PC4" , "gps_ibd", "Missense" , "Nonsense" , "Frameshift" , "Insertion/Deletion" ]
 COR_ARTERY_PAR = []
 
-INPUT_PAR ={'BC': BREAST_PAR, 'CC':COLREC_PAR, 'CAD': COR_ARTERY_PAR }
+INPUT_PAR ={'BC': BC_PAR, 'CC':COLREC_PAR, 'CAD': COR_ARTERY_PAR }
 
 ########################################
 ###### Phenotypes Constants ############
@@ -50,20 +51,14 @@ def id_variant(gene, n_pos, alt, gene_to_chrom = GENE_TO_CHROM):
     return str(gene_to_chrom[gene]) + ':g.' + str(n_pos) + alt
 
 def request_var_data(variant):
-    #vep_server = "https://rest.ensembl.org"
     vep_server = "https://grch37.rest.ensembl.org/"
     ext = "/vep/human/hgvs/"
     api_url = vep_server+ext+variant+ '?Conservation=1&CADD=1&canonical=1'
-    #api_url_ext = vep_server + reg_ext + reg_variant
     try:
         r = requests.get(api_url, headers={ "Content-Type" : "application/json"}, verify=False, timeout=5)
         if not r.ok:
             return "Bad request"
-            #r.raise_for_status()
-             #sys.exit()
-            #return "Bad request"
         decoded = r.json()[0]
-        #return decoded['id'], decoded['most_severe_consequence']
         return decoded
     except requests.exceptions.Timeout:
         return "timeout"
@@ -72,13 +67,13 @@ def request_var_data(variant):
 
 def extract_counters(variant, counters):
     data = request_var_data(variant)
-    #print(data)
     return {c: data.get(c, None) for c in counters}
     
 def extract_var_covs_from_VEP(variant, counters = ['most_severe_consequence', 'transcript_consequences', 'colocated_variants']):
     info = {}
     data = request_var_data(variant)
     extracted = {c: data.get(c, None) for c in counters}
+    
     can_trans =[t for t in extracted['transcript_consequences'] if 'canonical' in t] 
     if can_trans:
         info['CADD'] = can_trans[0]['cadd_raw']
@@ -120,7 +115,6 @@ def get_polygenetic_input(disease, polygenetic_selected, gene_selected, prs=None
 ##################################################
 
 def get_phenotypes(disease, phenotype_file = PHENOTYPE_FILE):
-    #df = access_dropbox_file(phenotype_file)
     df = pd.read_json(phenotype_file)
     if disease in PHENOTYPE_PAR:
         return df[PHENOTYPE_PAR[disease]].apply(pd.to_numeric).mean(axis = 0, skipna = True)
@@ -132,20 +126,31 @@ def get_phenotypes(disease, phenotype_file = PHENOTYPE_FILE):
 ###### Process User Input from Interface #########
 ##################################################
         
-def process_model_input(variant, disease, model, var_args, input_args, phenotype_args = dict()):
+def process_model_input(dis_tab, gene, n_pos, alt, obese_hist, prs, model):
+    variant = id_variant(gene, n_pos, alt)
     var_args = extract_var_covs_from_VEP(variant)
+    input_args = get_polygenetic_input(dis_tab, obese_hist, gene, prs)
+    phenotype_args = get_phenotypes(dis_tab)
     all_args = {**var_args, **input_args, **phenotype_args}
-    data = [0 for i in INPUT_PAR[disease]]
-    #data = [float(all_args[i]) for i in INPUT_PAR[disease]]
+    #print('all args')
+    #print(all_args)
+    #data = [0 for i in INPUT_PAR[tab]]
     labels = model.summary.index
+    data = [float(all_args.get(i, 0)) for i in labels]
+    
     df = pd.DataFrame({'patient': data})
      
     df['labels'] = labels
     df = df.set_index('labels').T
-    df['GERP'] = -5
-    df['PRS'] = all_args['PRS']
- 
-    return df.drop(columns = ['Silent'])
+    #df['GERP'] = -5
+    #df['PRS'] = all_args['PRS']
+    print('patient data')
+    print(df)
+    print('input')
+    print(df.columns)
+    print('model_par')
+    print(labels)
+    return df
         
     
     
