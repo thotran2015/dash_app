@@ -4,15 +4,14 @@ One Paragraph of project description goes here
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 git clone https://github.com/thotran2015/dash_app.git 
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
+Install Dash Framework. More info can be found here : https://dash.plot.ly/installation 
 
 ```
-Give examples
+pip install dash==1.8.0
 ```
 
 ### Installing
@@ -22,10 +21,10 @@ A step by step series of examples that tell you how to get a development env run
 Say what the step will be
 
 ```
-Give the example
+pip install -r requirements.txt
 ```
 
-And repeat
+And install any missing packages or dependencies
 
 ```
 until finished
@@ -33,16 +32,23 @@ until finished
 
 End with an example of getting some data out of the system or using it for a little demo
 
-## Running the tests
+## Running the app
 
-Explain how to run the automated tests for this system
+To run locally,
+```
+python index.py
+```
 
-### Break down into end to end tests
+### Break down into end to end app
 
-Explain what these tests test and why
+Explain what these files contain and why
 
 ```
-Give an example
+index.py is for the first page
+layouts.py is for the static front end
+layout_util.py contains supporting methods for the layout page
+callbacks.py is for the interactive elements on the webapp. It is responsible for taking user input and respond to those input accordingly
+callback_util.py contains supporting methids for the callbacks in callbacks.py
 ```
 
 ### And coding style tests
@@ -55,27 +61,34 @@ Give an example
 
 ## Deployment
 
-Add additional notes about how to deploy this on a live system
+To deploy any changes to the Heroku app, 
+git add .
+git commit -m "your message for this edit"
+git push heroku master
+
+To deploy any changes to the git repo on Github, 
+git add .
+git commit -m "your message for this edit"
+git push origin master
 
 ## Built With
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+* [Dash](https://dash.plot.ly/) - The web framework used
+* [Heroku](https://devcenter.heroku.com/) - The deployment platform used
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+Please read [CONTRIBUTING.md]('') for details on our code of conduct, and the process for submitting pull requests to us.
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+We use [SemVer]('') for versioning. For the versions available, see the [tags on this repository](''). 
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Tho Tran** - *Initial work* - [Survival App](https://github.com/thotran2015/dash_app)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/thotran2015/dash_app/graphs/contributors) who participated in this project.
 
 ## License
 

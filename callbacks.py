@@ -27,6 +27,10 @@ GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, '
 
 model_loc = './models/BRCA2_10_31.pickle'
 
+#################################################
+# TODO: INPUT YOUR FAVORITE SURVIVAL MODEL HERE #
+#################################################
+
 MODEL = load_model(model_loc)
 
 
