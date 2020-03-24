@@ -1,7 +1,5 @@
 from dash.dependencies import Input, Output
 from app import app
-#import computation as model
-#import load_model as life_model
 import numpy as np
 
 
@@ -18,20 +16,21 @@ from callbacks_util import load_model, get_covariate_grps_callback, get_ph_ratio
        # 'PRS', 'PC1', 'PC2', 'PC3', 'PC4', 'Family History', 'Region 1',
        # 'Region 2', 'Region 3', 'Region 4', 'Region 5']
 
-#generate tab
+#disease and their code names
 DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary Artery Disease'}
+#parameter value range for each covariate group
 COVARIATES = {'PRS':np.arange(-5, 6, 5), 'Family History': np.arange(0,2), 'Family History': np.arange(0,2), 'Family History': np.arange(0,2)}
 COV_OUTPUTS = [Output('covariate-plot-'+cov, 'figure') for cov in COVARIATES] 
 
 GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 9, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
 
-model_loc = './models/BRCA2_10_31.pickle'
+MODEL_LOC = './models/BRCA2_10_31.pickle'
 
 #################################################
 # TODO: INPUT YOUR FAVORITE SURVIVAL MODEL HERE #
 #################################################
 
-MODEL = load_model(model_loc)
+MODEL = load_model(MODEL_LOC)
 
 
 

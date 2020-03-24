@@ -48,9 +48,9 @@ def setup_ph_plot(id):
                                                'zoomOut2d', 'zoomIn2d',
                                                'hoverClosestCartesian',
                                                # 'sendDataToCloud',
-                                               'resetScale2d']
+                                               'resetScale2d'],
             }), 
-            style = {'width': '25%', 'display': 'inline-block' }
+            style = {'width': '50%', 'display': 'inline-block',}
             )
 
 def setup_covariate_plot(id):

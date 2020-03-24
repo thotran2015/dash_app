@@ -182,26 +182,41 @@ def get_ph_ratios_callback(model):
     def fill_ph_ratios_plot(ph_data, title):
         return {'data': ph_data,
                  'layout': { 
-                     'title' : 'PH of '+  title,
+                     'title' : title,
                      'xaxis': {
                          'title': 'HR',
-                         'type': 'linear' 
+                         'type': 'linear',
+                         'automargin': True
         
                          },
                      'yaxis' : {
-                         'type': 'category' 
-        
+                         'type': 'category',
+                         'automargin': True
+                         
+                
                          },
+                     'legend': {
+                         'orientation': 'h',
+                         'xanchor':'right',
+                         'yanchor':'center'
+                         },
+                
+                     
                      }} 
 
     def plot_box_plot_coef(cov_grps = cov_grps):
         ph_ratios_plots = []
         for cov in cov_grps:
             ph_data = [
-              {'x': xy, 'y': [i]*len(xy), 'type': 'scatter', 'name': i, 'mode':'lines+markers',
+              {'x': [xy[1]], 'y': [i], 'type': 'scatter', 'name': i, 'mode':'markers', 'showlegend': False,
+               'error_x': {
+                   'type': 'data',
+                   'symmetric': False,
+                   'array': [xy[2]-xy[0]],
+                   'arrayminus':[xy[1]-xy[0]]}, 
                   } for i, xy in ph_ratios.items() if i in cov
               ]
-            ph_ratios_plots.append(fill_ph_ratios_plot(ph_data, ', '.join(cov)))
+            ph_ratios_plots.append(fill_ph_ratios_plot(ph_data, 'Partial Hazard Ratios of Covariates'))
         return ph_ratios_plots
     return plot_box_plot_coef
 
