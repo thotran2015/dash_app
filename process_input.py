@@ -5,17 +5,16 @@ Created on Fri Jan 31 14:22:48 2020
 
 @author: thotran
 """
-import requests
+import pickle
 import pandas as pd
-import numpy as np
 
-GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 9, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
-GENE_TO_DISEASE = {'BC': ['BRCA1', 'BRCA2'], 'CC': ['MSH2', 'MSH6', 'PMS2', 'MLH1'], 'CAD': ['LDLR', 'APOB', 'PCSK9']}
+import query_variant_data as q
+import extract_variant_data as ev
+import extract_individual_data as ei
 
-MUTATION_TYPES = {'synonymous_variant':'Silent', 'missense_variant': 'Missense', 'nonsense_variant':'Nonsense'}
-CONSEQ = {"Silent", "Nonsense", "Missense", "Deletion", "Frameshift", "Insertion/Deletion"}
 
-POLYGENETIC_OPTIONS = ['Family History', 'obese']
+VEP38_URL = 'https://rest.ensembl.org/vep/human/hgvs/'
+VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
 
 BC_PAR = ['log Allele Frequency', 'Phylop', 'GERP', 'CADD', 'Missense',
        'Nonsense', 'Frameshift', 'Insertion/Deletion', 'Silent', 'Transition',
@@ -29,128 +28,62 @@ COR_ARTERY_PAR = []
 
 INPUT_PAR ={'BC': BC_PAR, 'CC':COLREC_PAR, 'CAD': COR_ARTERY_PAR }
 
-########################################
-###### Phenotypes Constants ############
-########################################
-PHENOTYPE_FILE = './data/phenotypes.json'
-PHENOTYPE_PAR = {'BC': ['PC1', 'PC2', 'PC3', 'PC4', 'gps_breastcancer'],
-                'CC': ['PC1', 'PC2', 'PC3', 'PC4', 'gps_ibd']}
+
 
 ##################################################
 ###### Process Variant Input from VEP ############
 ##################################################
-
-def set_mutation_type_binary_vector(var_type, mut_types = MUTATION_TYPES, conseq = CONSEQ):
-    mut_type = mut_types.get(var_type, 'Other')
-    return {c: 1 if c == mut_type else 0 for c in conseq}
-
- 
-
-def id_variant(gene, n_pos, alt, gene_to_chrom = GENE_TO_CHROM):
-    #'17:g.41197701G>A'
-    return str(gene_to_chrom[gene]) + ':g.' + str(n_pos) + alt
-
-def request_var_data(variant):
-    vep_server = "https://grch37.rest.ensembl.org/"
-    ext = "/vep/human/hgvs/"
-    api_url = vep_server+ext+variant+ '?Conservation=1&CADD=1&canonical=1'
-    try:
-        r = requests.get(api_url, headers={ "Content-Type" : "application/json"}, verify=False, timeout=5)
-        if not r.ok:
-            return "Bad request"
-        decoded = r.json()[0]
-        return decoded
-    except requests.exceptions.Timeout:
-        return "timeout"
+VEP38_URL = 'https://rest.ensembl.org/vep/human/hgvs/'
+VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
 
 
+def get_variant_data(gene, n_pos, alt, vep_url):
+    variant = q.id_variant(gene, n_pos, alt)
+    data = q.request_var_data(variant, vep_url)
+    if data == 'timeout':
+        print(data)
+    covariates = ev.extract_variant_attributes(data)
+    return pd.Series(covariates)
 
-def extract_counters(variant, counters):
-    data = request_var_data(variant)
-    return {c: data.get(c, None) for c in counters}
-    
-def extract_var_covs_from_VEP(variant, counters = ['most_severe_consequence', 'transcript_consequences', 'colocated_variants']):
-    info = {}
-    data = request_var_data(variant)
-    extracted = {c: data.get(c, None) for c in counters}
-    
-    can_trans =[t for t in extracted['transcript_consequences'] if 'canonical' in t] 
-    if can_trans:
-        info['CADD'] = can_trans[0]['cadd_raw']
-        info['GERP'] = can_trans[0]['conservation']
-        var_type = can_trans[0]['consequence_terms'][0]
-        info.update(set_mutation_type_binary_vector(var_type))
-    else:
-        info['CADD'] = 0
-        info['GERP'] = 0
-        info.update(set_mutation_type_binary_vector('Other'))
-    freq = float(extracted['colocated_variants'][0]['frequencies']['A']['gnomad']) 
-    info['log Allele Frequency'] = -np.log10(freq)
-    if info['log Allele Frequency']== 0.0:
-        info['log Allele Frequency'] = 3e-6
-    return info
+def get_pat_data(gene, n_pos, alt, disease, sex, other, vep_url):
+    variant = q.id_variant(gene, n_pos, alt)
+    data = q.request_var_data(variant, vep_url)
+    if data == 'timeout':
+        print(data)
+    covariates = ev.extract_variant_attributes(data)
+    ind = ei.extract_ind_data(disease, other, gene, sex)
+    pat_data = {**covariates, **ind}
+    return pat_data
 
 
-    
-##################################################
-###### Process User Input from Interface #########
-##################################################
-
-def get_polygenetic_input(disease, polygenetic_selected, gene_selected, prs=None):
-    polygene = {option: 1 if option in polygenetic_selected else 0 for option in POLYGENETIC_OPTIONS}
-    if prs !=None:
-        polygene["PRS"] = prs
-
-    for gene in GENE_TO_DISEASE[disease]:
-        if gene == gene_selected: 
-            polygene[gene] = 1
-        else:
-            polygene[gene] = 0
-
-    return polygene
-
-
-##################################################
-###### Process Patient Phenotypes like PCs #########
-##################################################
-
-def get_phenotypes(disease, phenotype_file = PHENOTYPE_FILE):
-    df = pd.read_json(phenotype_file)
-    if disease in PHENOTYPE_PAR:
-        return df[PHENOTYPE_PAR[disease]].apply(pd.to_numeric).mean(axis = 0, skipna = True)
-    else:
-        return 'No Data in Phenotype File'
-
-
-##################################################
-###### Process User Input from Interface #########
-##################################################
+##########################################
+###### Process Patient For Model #########
+##########################################
         
-def process_model_input(dis_tab, gene, n_pos, alt, obese_hist, prs, model):
-    variant = id_variant(gene, n_pos, alt)
-    var_args = extract_var_covs_from_VEP(variant)
-    input_args = get_polygenetic_input(dis_tab, obese_hist, gene, prs)
-    phenotype_args = get_phenotypes(dis_tab)
-    all_args = {**var_args, **input_args, **phenotype_args}
-    #print('all args')
-    #print(all_args)
-    #data = [0 for i in INPUT_PAR[tab]]
-    labels = model.summary.index
-    data = [float(all_args.get(i, 0)) for i in labels]
+def process_patient_data(pat_data, model):
+    pars = model.summary.index
+    data = {p: pat_data.get(p, None) for p in pars}
+    return pd.Series(data)
+
+
+
+# Example 1: Get Raw Unprocessed Data from VEP
+variant = q.id_variant('MLH1', 37070280, 'G>A')
+data = q.request_var_data(variant, VEP37_URL)
+print(data)
     
-    df = pd.DataFrame({'patient': data})
-     
-    df['labels'] = labels
-    df = df.set_index('labels').T
-    #df['GERP'] = -5
-    #df['PRS'] = all_args['PRS']
-    print('patient data')
-    print(df)
-    print('input')
-    print(df.columns)
-    print('model_par')
-    print(labels)
-    return df
+
+# Example 2: Get pre-processed variant data 
+print(get_variant_data('MLH1', 37070280, 'G>A', VEP37_URL))
+    
         
     
+#Example 3: Get processed, complete patient data for model
+#### Uncomment to see result #####
+# MLH1_model = './models/MLH1_model.pickle'
+# with open(MLH1_model, 'rb') as m:
+#     model = pickle.load(m)
     
+# pat_data = get_pat_data('MLH1', 37070280, 'G>A', 'CC', 'F', ['Family History', 'obese'], VEP37_URL)
+# pat_df = process_patient_data(pat_data, model)
+# print(pat_df)

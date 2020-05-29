@@ -4,8 +4,8 @@ import numpy as np
 
 
 #from computation import get_callback, fill_survival_func, get_ph_ratios_callback
-from process_input import process_model_input
-from callbacks_util import load_model, get_covariate_grps_callback, get_ph_ratios_callback, get_survival_callback
+from process_input import process_patient_data
+from callbacks_util import load_model, get_covariate_grps_callback, get_ph_ratios_callback, get_survival_callback, get_covariate_groups
 
 #############################################
 # Interaction Between Components / Controller
@@ -24,7 +24,7 @@ COV_OUTPUTS = [Output('covariate-plot-'+cov, 'figure') for cov in COVARIATES]
 
 GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 9, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
 
-MODEL_LOC = './models/BRCA2_10_31.pickle'
+MODEL_LOC = './models/BRCA2_model.pickle'
 
 #################################################
 # TODO: INPUT YOUR FAVORITE SURVIVAL MODEL HERE #
@@ -89,8 +89,9 @@ def plot_ph_ratios(tab, gene, n_pos, alt, obese_hist):
 #   )
 # def plot_covariates(tab, gene, n_pos, alt, obese_hist, prs):
     
-#     data = [get_covariate_grps_callback(cov, val_range, MODEL)() for cov, val_range in COVARIATES.items()]
-#     return data
+#     #data = [get_covariate_grps_callback(cov, val_range, MODEL)() for cov, val_range in COVARIATES.items()]
+#     #print(data)
+#     return 
 
     
 @app.callback(
@@ -106,8 +107,12 @@ def get_variant_data(tab, gene, n_pos, alt, obese_hist, prs):
     counters = ['most_severe_consequence', 'transcript_consequences', 'colocated_variants']
     #data_ = extract_var_covs(variant)
     #print(data_)
-    return 'testing'
+    return "hi"
 
+# for cov, val_range in COVARIATES.items():
+#     print(cov, val_range)
+#     print(MODEL.plot_covariate_groups(cov, values=[-1, 0, 1]))
+#     break
 
 
 # variant = '17:g.41197701G>A'

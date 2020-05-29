@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import pickle 
 import requests
+import process_input as pi
 
 GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 9, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
 MUTATION_TYPES = {'synonymous_variant':'Silent', 'missense_variant': 'Missense', 'nonsense_variant':'Nonsense'}
@@ -39,52 +40,58 @@ def load_model(model_loc):
 #####################################
 ###### PROCESS PATIENT DATA #########
 #####################################
-
-def set_mutation_type_binary_vector(var_type, mut_types = MUTATION_TYPES, conseq = CONSEQ):
-    mut_type = mut_types.get(var_type, 'Other')
-    return {c: 1 if c == mut_type else 0 for c in conseq}
-
-def get_survival_prob(model, patient_data):
-    return model.predict_survival_function(patient_data)['patient'].to_dict()
-
-
-def id_variant(gene, n_pos, alt, gene_to_chrom = GENE_TO_CHROM):
-    #'17:g.41197701G>A'
-    return str(gene_to_chrom[gene]) + ':g.' + str(n_pos) + alt
-
-def request_var_data(variant):
-    vep_server = "https://grch37.rest.ensembl.org/"
-    ext = "/vep/human/hgvs/"
-    api_url = vep_server+ext+variant+ '?Conservation=1&CADD=1&canonical=1'
-    try:
-        r = requests.get(api_url, headers={ "Content-Type" : "application/json"}, verify=False, timeout=5)
-        if not r.ok:
-            return "Bad request"
-        decoded = r.json()[0]
-        return decoded
-    except requests.exceptions.Timeout:
-        return "timeout"
-
-def extract_var_covs_from_VEP(variant, counters = ['most_severe_consequence', 'transcript_consequences', 'colocated_variants']):
-    info = {}
-    data = request_var_data(variant)
-    extracted = {c: data.get(c, None) for c in counters}
+        
+VEP38_URL = 'https://rest.ensembl.org/vep/human/hgvs/'
+VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
+        
     
-    can_trans =[t for t in extracted['transcript_consequences'] if 'canonical' in t] 
-    if can_trans:
-        info['CADD'] = can_trans[0]['cadd_raw']
-        info['GERP'] = can_trans[0]['conservation']
-        var_type = can_trans[0]['consequence_terms'][0]
-        info.update(set_mutation_type_binary_vector(var_type))
-    else:
-        info['CADD'] = 0
-        info['GERP'] = 0
-        info.update(set_mutation_type_binary_vector('Other'))
-    freq = float(extracted['colocated_variants'][0]['frequencies']['A']['gnomad']) 
-    info['log Allele Frequency'] = -np.log10(freq)
-    if info['log Allele Frequency']== 0.0:
-        info['log Allele Frequency'] = 3e-6
-    return info
+
+
+# def set_mutation_type_binary_vector(var_type, mut_types = MUTATION_TYPES, conseq = CONSEQ):
+#     mut_type = mut_types.get(var_type, 'Other')
+#     return {c: 1 if c == mut_type else 0 for c in conseq}
+
+# def get_survival_prob(model, patient_data):
+#     return model.predict_survival_function(patient_data)['patient'].to_dict()
+
+
+# def id_variant(gene, n_pos, alt, gene_to_chrom = GENE_TO_CHROM):
+#     #'17:g.41197701G>A'
+#     return str(gene_to_chrom[gene]) + ':g.' + str(n_pos) + alt
+
+# def request_var_data(variant):
+#     vep_server = "https://grch37.rest.ensembl.org/"
+#     ext = "/vep/human/hgvs/"
+#     api_url = vep_server+ext+variant+ '?Conservation=1&CADD=1&canonical=1'
+#     try:
+#         r = requests.get(api_url, headers={ "Content-Type" : "application/json"}, verify=False, timeout=5)
+#         if not r.ok:
+#             return "Bad request"
+#         decoded = r.json()[0]
+#         return decoded
+#     except requests.exceptions.Timeout:
+#         return "timeout"
+
+# def extract_var_covs_from_VEP(variant, counters = ['most_severe_consequence', 'transcript_consequences', 'colocated_variants']):
+#     info = {}
+#     data = request_var_data(variant)
+#     extracted = {c: data.get(c, None) for c in counters}
+#     can_trans =[t for t in extracted['transcript_consequences'] if 'canonical' in t] 
+#     if can_trans:
+#         info['CADD'] = can_trans[0].get('cadd_raw', 0.5)
+#         info['GERP'] = can_trans[0].get('conservation', 0.5)
+#         var_type = can_trans[0]['consequence_terms'][0]
+#         info.update(set_mutation_type_binary_vector(var_type))
+#     else:
+#         info['CADD'] = 0
+#         info['GERP'] = 0
+#         info.update(set_mutation_type_binary_vector('Other'))
+#     freq = float(extracted['colocated_variants'][0]['frequencies']['A']['gnomad']) 
+#     info['log Allele Frequency'] = -np.log10(freq)
+#     if info['log Allele Frequency']== 0.0:
+#         info['log Allele Frequency'] = 3e-6
+
+#     return info
 
 
     
@@ -118,30 +125,31 @@ def get_phenotypes(disease, phenotype_file = PHENOTYPE_FILE):
         return 'No Data in Phenotype File'
 
 
-def process_model_input(dis_tab, gene, n_pos, alt, obese_hist, prs, model):
-    variant = id_variant(gene, n_pos, alt)
-    var_args = extract_var_covs_from_VEP(variant)
-    input_args = get_polygenetic_input(dis_tab, obese_hist, gene, prs)
-    phenotype_args = get_phenotypes(dis_tab)
-    all_args = {**var_args, **input_args, **phenotype_args}
-    labels = model.summary.index
-    data = [float(all_args.get(i, 0)) for i in labels]
-    df = pd.DataFrame({'patient': data})
-    df['labels'] = labels
-    df = df.set_index('labels').T
-    return df
+# def process_model_input(dis_tab, gene, n_pos, alt, obese_hist, prs, model):
+#     variant = id_variant(gene, n_pos, alt)
+#     var_args = extract_var_covs_from_VEP(variant)
+#     input_args = get_polygenetic_input(dis_tab, obese_hist, gene, prs)
+#     phenotype_args = get_phenotypes(dis_tab)
+#     all_args = {**var_args, **input_args, **phenotype_args}
+#     labels = model.summary.index
+#     data = [float(all_args.get(i, 0)) for i in labels]
+#     df = pd.DataFrame({'patient': data})
+#     df['labels'] = labels
+#     df = df.set_index('labels').T
+#     return df
 
 
 def get_survival_callback(dis_tab, gene, n_pos, alt, obese_hist, prs, model): 
     #patient_data = get_patient_data(dis_tab, gene, n_pos, alt, obese_hist, prs, model)
-    pat_data = process_model_input(dis_tab, gene, n_pos, alt, obese_hist, prs, model)
-    surv = get_survival_prob(model, pat_data)
-    baseline = model.baseline_survival_['baseline survival'].to_dict()
+    sex = 'F'
+    pat_data = pi.get_pat_data(gene, n_pos, alt, dis_tab, sex , obese_hist, VEP37_URL)
+    model_input = pi.process_patient_data(pat_data, model)
+    surv = model.predict_survival_function(model_input)[0]
+    baseline = model.baseline_survival_['baseline survival']
     def plot_survival_func():
         data = [
-        {'x': list(baseline.keys()), 'y': list(baseline.values()), 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
-                
-        {'x': list(surv.keys()), 'y': list(surv.values()), 'type': 'line', 'name': 'individual', 'marker': dict(color='rgb(26, 118, 255)') }
+        {'x': baseline.keys(), 'y': baseline.values, 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
+        {'x': surv.keys(), 'y': surv.values, 'type': 'line', 'name': 'individual', 'marker': dict(color='rgb(26, 118, 255)') }
             ]
         return {
             'data': data,
@@ -184,7 +192,7 @@ def get_ph_ratios_callback(model):
                  'layout': { 
                      'title' : title,
                      'xaxis': {
-                         'title': 'HR',
+                         'title': 'Hazard Ratio',
                          'type': 'linear',
                          'automargin': True
         
@@ -200,8 +208,6 @@ def get_ph_ratios_callback(model):
                          'xanchor':'right',
                          'yanchor':'center'
                          },
-                
-                     
                      }} 
 
     def plot_box_plot_coef(cov_grps = cov_grps):
@@ -239,13 +245,12 @@ def get_plot_layout(title, xlabel, ylabel):
             }
 
 def get_covariate_groups(model, covariate, val_range):
-    axes2 = model.plot_covariate_groups(covariate, values=val_range, cmap='coolwarm', label = 'covs', plot_baseline=False)
-    lines = axes2.get_lines()
-    axes2.clear()
+    if covariate in model.summary.index: 
+        axes2 = model.plot_covariate_groups(covariate, values=val_range, cmap='coolwarm', label = 'covs', plot_baseline=False)
+        lines = axes2.get_lines()
+        axes2.clear()
     return {i.get_label(): i.get_data() for i in lines}
 
-# model_loc = './models/BRCA2_10_31.pickle'
-# MODEL = load_model(model_loc)
 
 # covariates = ['log Allele Frequency', 'Phylop', 'GERP', 'CADD', 'Missense',
 #        'Nonsense', 'Frameshift', 'Insertion/Deletion', 'Silent', 'Transition',
@@ -263,14 +268,14 @@ def get_covariate_groups(model, covariate, val_range):
 #        'Family History': np.arange(0,2), 'Region 1': np.arange(0,2),
 #        'Region 2': np.arange(0,2), 'Region 3': np.arange(0,2), 'Region 4': np.arange(0,2), 'Region 5': np.arange(0,2)}
 
-# print(MODEL.plot_covariate_groups('Region 5', values= np.arange(0,2), cmap='coolwarm', label = 'covs'))
-#print(get_covariate_groups(MODEL, 'Family History', np.arange(0,2)))
+
 def get_covariate_grps_callback(cov, val_range, model):
     covariate= cov
     if cov =='type':
         covariate= ['Silent', 'Nonsense', 'Frameshift', 'Insertion/Deletion']
     
     covariate_groups = get_covariate_groups(model, covariate, val_range= val_range)
+    print(covariate_groups)
     def fill_covariate_groups(cov_data, layout):
         return {'data': cov_data,
                 'layout': layout
@@ -283,3 +288,12 @@ def get_covariate_grps_callback(cov, val_range, model):
         layout = get_plot_layout('Survival based on '+ cov, 'Age', 'HR')
         return fill_covariate_groups(cov_data,layout)
     return plot_covariate_groups
+
+
+model_loc = './models/MLH1_model.pickle'
+#'BRCA2_10_31.pickle'
+
+MODEL = load_model(model_loc)
+
+#print(MODEL.plot_covariate_groups('Region 5', values= np.arange(0,3)))
+#print(get_covariate_groups(MODEL, 'Family History', np.arange(0,2)))
