@@ -33,9 +33,6 @@ INPUT_PAR ={'BC': BC_PAR, 'CC':COLREC_PAR, 'CAD': COR_ARTERY_PAR }
 ##################################################
 ###### Process Variant Input from VEP ############
 ##################################################
-VEP38_URL = 'https://rest.ensembl.org/vep/human/hgvs/'
-VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
-
 
 def get_variant_data(gene, n_pos, alt, vep_url):
     variant = q.id_variant(gene, n_pos, alt)
