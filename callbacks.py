@@ -1,39 +1,38 @@
 from dash.dependencies import Input, Output
 from app import app
 import numpy as np
+from callbacks_util import load_model, get_covariate_grps_callback, get_hazard_ratios_callback, get_survival_callback
 
-
-#from computation import get_callback, fill_survival_func, get_ph_ratios_callback
-from process_input import process_patient_data
-from callbacks_util import load_model, get_covariate_grps_callback, get_ph_ratios_callback, get_survival_callback, get_covariate_groups
 
 #############################################
 # Interaction Between Components / Controller
 #############################################
 
-#BREAST_PAR = ['Nonsense', 'Frameshift', 'Insertion/Deletion', 'Silent', 'Transition',
-       # 'Transversion', 'CpG Removing', 'CpG Creating', 'Splice Affecting',
-       # 'PRS', 'PC1', 'PC2', 'PC3', 'PC4', 'Family History', 'Region 1',
-       # 'Region 2', 'Region 3', 'Region 4', 'Region 5']
-
 #disease and their code names
 DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary Artery Disease'}
 #parameter value range for each covariate group
-COVARIATES = {'PRS':np.arange(-5, 6, 5), 'Family History': np.arange(0,2), 'Family History': np.arange(0,2), 'Family History': np.arange(0,2)}
-COV_OUTPUTS = [Output('covariate-plot-'+cov, 'figure') for cov in COVARIATES] 
+COV_DISEASE = {'BC': ['Family History', 'log Allele Frequency', 'Mutations', 'PRS'],
+               'CC':  ['Family History', 'log Allele Frequency', 'Mutations', 'sex'],
+               'CAD' : ['Family History', 'log Allele Frequency', 'Mutations', 'PRS']}
 
-GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 9, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
+COVARIATES = {'log Allele Frequency':np.arange(0, 6, 1), 'Family History': np.arange(0,2), 'Mutations': np.arange(0,2), 'PRS': np.arange(0,3), 'sex': np.arange(0,2)}
+COV_OUTPUTS = [Output('covariate-plot-' + str(i), 'figure') for i in range(4)] 
 
-MODEL_LOC = './models/BRCA2_model.pickle'
+GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 3, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
+
+BRCA2_MODEL_LOC = './models/BRCA2_10_31.pickle'
+MLH1_MODEL_LOC = './models/MLH1_model.pickle'
+LDLR_MODEL_LOC = './models/LDLR_model.pickle'
 
 #################################################
 # TODO: INPUT YOUR FAVORITE SURVIVAL MODEL HERE #
 #################################################
 
-MODEL = load_model(MODEL_LOC)
+MLH1_MODEL = load_model(MLH1_MODEL_LOC)
+BRCA2_MODEL = load_model(BRCA2_MODEL_LOC)
+LDLR_MODEL = load_model(LDLR_MODEL_LOC)
 
-
-
+GENE_MODELS = {'MLH1': MLH1_MODEL, 'BRCA2': BRCA2_MODEL, 'BRCA1': BRCA2_MODEL, 'LDLR': LDLR_MODEL}
 
 #####################################
 ###### SURVIVAL FUNCTION PLOT #######
@@ -41,13 +40,21 @@ MODEL = load_model(MODEL_LOC)
     
 
 @app.callback(
-    Output(component_id='survival-plot-', component_property='figure'),
+    Output(component_id='survival-plot', component_property='figure'),
     [Input(component_id='tabs', component_property='value'), 
-    Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
-    Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
+    Input(component_id='gene', component_property='value'), 
+    Input(component_id='mut_type', component_property='value'), 
+    Input(component_id='chrom', component_property='value'),
+    Input(component_id='start', component_property='value'),
+    Input(component_id='end', component_property='value'),
+    Input(component_id='ref', component_property='value'),
+    Input(component_id='alt', component_property='value'),
+    Input(component_id='obese-hist', component_property='value'), 
+    Input(component_id='sex', component_property='value')
     ])
-def plot_survival_function(dis_tab, gene, n_pos, alt, obese_hist, prs, model = MODEL):
-    return get_survival_callback(dis_tab, gene, n_pos, alt, obese_hist, prs, model)()
+def plot_survival_function(dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex, prs=0):
+    model = GENE_MODELS[gene]
+    return get_survival_callback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex, prs, model)()
     
 
 @app.callback(
@@ -67,11 +74,11 @@ def update_output(value):
     [Output(component_id='ph-plot-1', component_property='figure'), Output(component_id='ph-plot-2', component_property='figure'),
      Output(component_id='ph-plot-3', component_property='figure'), Output(component_id='ph-plot-4', component_property='figure')],
     [Input(component_id='tabs', component_property='value'), 
-    Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
-    Input(component_id='obese-hist', component_property='value')
+    Input(component_id='gene', component_property='value'), 
     ])
-def plot_ph_ratios(tab, gene, n_pos, alt, obese_hist):
-    return get_ph_ratios_callback(MODEL)()
+def plot_ph_ratios(tab, gene):
+    model = GENE_MODELS[gene]
+    return get_hazard_ratios_callback(model)()
     
     
 
@@ -81,39 +88,26 @@ def plot_ph_ratios(tab, gene, n_pos, alt, obese_hist):
     
 
 
-# @app.callback(
-#   COV_OUTPUTS,
-#       [Input(component_id='tabs', component_property='value'),
-#       Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
-#       Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')]
-#   )
-# def plot_covariates(tab, gene, n_pos, alt, obese_hist, prs):
-    
-#     #data = [get_covariate_grps_callback(cov, val_range, MODEL)() for cov, val_range in COVARIATES.items()]
-#     #print(data)
-#     return 
-
-    
 @app.callback(
-    Output(component_id='test-output', component_property='children'),
-    [Input(component_id='tabs', component_property='value'), 
-    Input(component_id='gene', component_property='value'), Input(component_id='n_pos', component_property='value'), Input(component_id='alt', component_property='value'),
-    Input(component_id='obese-hist', component_property='value'), Input(component_id='prs-slider', component_property='value')
-    ])
-def get_variant_data(tab, gene, n_pos, alt, obese_hist, prs):
-    #var_id = format_variant_id(gene, n_pos, alt, gene_to_chrom = GENE_TO_CHROM, ens = ':g.')
-    variant = '17:g.41197701G>A'
-    ext_variant = "1:156084756:156084756:1/A"
-    counters = ['most_severe_consequence', 'transcript_consequences', 'colocated_variants']
-    #data_ = extract_var_covs(variant)
-    #print(data_)
-    return "hi"
+    COV_OUTPUTS,
+    [Input(component_id='tabs', component_property='value'),
+    Input(component_id='gene', component_property='value'), 
+    Input(component_id='mut_type', component_property='value'), 
+    Input(component_id='chrom', component_property='value'),
+    Input(component_id='start', component_property='value'),
+    Input(component_id='end', component_property='value'),
+    Input(component_id='ref', component_property='value'),
+    Input(component_id='alt', component_property='value'),
+    Input(component_id='obese-hist', component_property='value'), 
+    Input(component_id='sex', component_property='value')
+      ])
+def plot_covariates(dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex, prs=0):
+    model = GENE_MODELS[gene]
+    data = [get_covariate_grps_callback(cov, COVARIATES[cov], dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex, prs, model)() 
+            for cov in COV_DISEASE[dis_tab]]
+    return data
 
-# for cov, val_range in COVARIATES.items():
-#     print(cov, val_range)
-#     print(MODEL.plot_covariate_groups(cov, values=[-1, 0, 1]))
-#     break
-
+    
 
 # variant = '17:g.41197701G>A'
 # counters = ['most_severe_consequence', 'transcript_consequences', 'colocated_variants']

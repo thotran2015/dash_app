@@ -1,205 +1,103 @@
 import dash_core_components as dcc
 import dash_html_components as html
-from layout_util import setup_polygenetic_checklist, setup_covariate_plot, setup_survival_plot, setup_ph_plot, setup_prs_slider
+from layout_util import setup_default_menu, setup_covariate_plot, setup_survival_plot, setup_ph_plot
 
 #Coronary Artery Disease
 # variant sample: 19-11200228-G-C
 
 
 COVARIATES = ['PRS', 'Family History','log Allele Frequency', 'type']
-cov_plot_layout = [setup_covariate_plot(cov)
-    for cov in COVARIATES]
+cov_plot_layout = [setup_covariate_plot(cov) for cov in COVARIATES]
+bgColor = 'lightgrey'
+boxSha =  '5px 5px grey'
+
+COV_DISEASE = {'breast cancer': [['Family History', 'log Allele Frequency'], ['Mutations', 'PRS']],
+               'colorectal cancer':  [['Family History', 'log Allele Frequency'], ['Mutations', 'sex']],
+               'coronary artery disease' : [['Family History', 'log Allele Frequency'], ['Mutations', 'PRS']]}
+
+def get_template_layout(disease): 
+    covariate_groups = COV_DISEASE[disease]
+    return [
+    html.Div([
+        html.Div(
+                 setup_default_menu(disease),
+                 id = 'menu-wrapper', className = 'six columns', style = dict(backgroundColor = 'white', boxShadow = boxSha)),
+            
+            html.Div(setup_survival_plot(), id = 'survival-plot-wrapper', className = 'six columns',
+                     style = dict(backgroundColor = 'white', boxShadow = boxSha)
+                     )
+            ],
+           id = 'menu-survival-curve', className = 'row', style = dict(backgroundColor = bgColor, padding = '2%', display ='flex')
+            ),
+    html.Div([
+        html.Div(
+            setup_ph_plot('1'),
+            id = 'hazard-ratio-1-wrapper', className = 'six columns', style = dict(boxShadow = boxSha)),
+        html.Div(
+            setup_ph_plot('2'),
+            id = 'hazard-ratio-2-wrapper', className = 'six columns', style = dict(boxShadow = boxSha)),
+            ],
+        id = 'hazard-ratio-plot-1-2', className = 'row', style = dict(backgroundColor = bgColor, padding = '2%', display = 'flex')),
+
+    html.Div([
+        html.Div(
+            setup_ph_plot('3'),
+            id = 'hazard-ratio-3-wrapper', className = 'six columns',  style = dict(boxShadow = boxSha)),
+        html.Div(
+            setup_ph_plot('4'),
+            id = 'hazard-ratio-4-wrapper', className = 'six columns',  style = dict(boxShadow = boxSha)),
+            ],
+        id = 'hazard-ratio-plot-3-4', className = 'row', style = dict(backgroundColor = bgColor, padding = '2%',  display = 'flex')),
+        
+    html.Div(
+        [html.Div(setup_covariate_plot(str(i)),
+            id = 'cov-group-plot-1-wrapper', className = 'six columns',  style = dict(boxShadow = boxSha))
+         for i, cov in enumerate(covariate_groups[0])],
+        id = 'cov-group-plot-1-2', className = 'row', style = dict(backgroundColor = bgColor, padding = '2%',  display = 'flex')
+       ),
+    html.Div(
+        [html.Div(setup_covariate_plot(str(2+i)),
+            id = 'cov-group-plot-2-wrapper', className = 'six columns',  style = dict(boxShadow = boxSha))
+         for i, cov in  enumerate(covariate_groups[1])],
+        id = 'cov-group-plot-3-4', className = 'row', style = dict(backgroundColor = bgColor, padding = '2%',  display = 'flex')
+       )
+    ]
 
 #Breast Cancer
-layout2 = html.Div( children =[
-    html.Div(id='test-output'),
-    html.Label('Breast Cancer'),
-
-    html.Label('Gene'),
-    dcc.Dropdown(id = 'gene', value='BRCA1', 
-      options = [
-            {'label': 'BRCA 1', 'value': 'BRCA1'},
-            {'label': 'BRCA 2', 'value': 'BRCA2'}]),
-
-    html.Label('Nucleotide Position (e.g. 41197701)'),
-    dcc.Input(id= 'n_pos', value = 41197701, type = 'number'),
-
-    html.Label('Alteration: Reference -> Mutation (e.g. G-A)'),
-    dcc.Input(id= 'alt', value = 'G>A' , type = 'text'),
-
-    html.Label('Basic Health Info: Check if you have'),
-    setup_polygenetic_checklist('obese-hist'),
-    
-    html.Div(id='prs'),
-    setup_prs_slider(),
-    
-    setup_survival_plot(''),
-    setup_ph_plot('1'),
-    setup_ph_plot('2'),
-    setup_ph_plot('3'),
-    setup_ph_plot('4'),
-
-    html.Div(
-        cov_plot_layout,
-       ),  
-    ])
+layout2 = get_template_layout('breast cancer')
 
 #Colerect Cancer
 # variant sample : 2-47630331-A-C
-layout3 = html.Div(children =[
-    html.Div(id='test-output'),
-    html.Label('Colorectal Cancer'),
+layout3 = get_template_layout('colorectal cancer')
 
-    html.Label('Gene'),
-    dcc.Dropdown(id = 'gene',value='MSH2', 
-      options = [
-            #msh2, msh6, pms2, mlh1
-            {'label': 'MSH 2', 'value': 'MSH2'},
-            {'label': 'MSH 6', 'value': 'MSH6'},
-            {'label': 'PMS 2', 'value': 'PMS2'},
-            {'label': 'MLH 1', 'value': 'MLH1'}]),
-
-    html.Label('Nucleotide Position (e.g. 47630331)'),
-    dcc.Input(id= 'n_pos', value = 47630331, type = 'number'),
-
-    html.Label('Alteration: Reference -> Mutation (e.g. A-C)'),
-    dcc.Input(id= 'alt', value = 'A-C' , type = 'text'),
-
-    html.Label('Basic Health Info: Check if you have'),
-    html.Div(
-      #style={'width':'10%', 'height':'100%','float':'left'},
-      children = [
-          dcc.Checklist(
-            id= 'obese-hist',
-            options = [
-            {'label': 'Severe obsesity', 'value': 'obese'},
-            {'label': 'Family history', 'value': 'fam_his'}],
-            value = ['default'],
-            labelStyle = {'display': 'block'}),
-      ]),
-    html.Div(id='prs'),
-    dcc.Slider(
-      id = 'prs-slider',
-      min=-5,
-      max=5,
-      step = 0.1,
-      marks={i/2: str(i/2) for i in range(-10,12)},
-      #marks={i: 'Label {}'.format(i) for i in range(-50,60)},
-      value=0,
-    ),
-    
-    dcc.Graph(
-        id='survival-plot',
-        config={
-                'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
-                                           'pan2d', 'toggleSpikelines',
-                                           'hoverCompareCartesian',
-                                           'zoomOut2d', 'zoomIn2d',
-                                           'hoverClosestCartesian',
-                                           # 'sendDataToCloud',
-                                           'resetScale2d'],
-        }),
 
     
-    html.P([
-        dcc.Graph(
-        id='covariate-plot1',
-        config={
-                'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
-                                           'pan2d', 'toggleSpikelines',
-                                           'hoverCompareCartesian',
-                                           'zoomOut2d', 'zoomIn2d',
-                                           'hoverClosestCartesian',
-                                           # 'sendDataToCloud',
-                                           'resetScale2d']
-        }),
-        dcc.Graph(
-        id='covariate-plot',
-        config={
-                'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
-                                           'pan2d', 'toggleSpikelines',
-                                           'hoverCompareCartesian',
-                                           'zoomOut2d', 'zoomIn2d',
-                                           'hoverClosestCartesian',
-                                           # 'sendDataToCloud',
-                                           'resetScale2d']
-        })
-       ],  style = {'width': 1000 })
-    
-    
-    
-    
-    ])
+layout1 = get_template_layout('coronary artery disease')
 
-    
-layout1 = html.Div(children =[
-    html.Div(id='test-output'),
-    html.Label('Coronary Artery Disease'),
+ # html.Div(id='test-output'),
+    # html.Label('Breast Cancer'),
+    # html.Label('Gene'),
+    # dcc.Dropdown(id = 'gene', value='BRCA1', 
+    #   options = [
+    #         {'label': 'BRCA 1', 'value': 'BRCA1'},
+    #         {'label': 'BRCA 2', 'value': 'BRCA2'}],
+    #   style= dict(
+    #       width='30%',
+    #       verticalAlign="left"
+    #             )),
 
-    html.Label('Gene'),
-    dcc.Dropdown(id = 'gene',value='LDLR', 
-      options = [
-            # LDLR, APOB, pcsk9
-            {'label': 'LDLR', 'value': 'LDLR'},
-            {'label': 'APOB', 'value': 'APOB'},
-            {'label': 'PCSK 9', 'value': 'PCSK9'}]),
 
-    html.Label('Nucleotide Position (e.g. 11200228)'),
-    dcc.Input(id= 'n_pos', value =11200228, type = 'number', placeholder = 11200228),
+    # html.Label('Nucleotide Position (e.g. 41197701)'),
+    # dcc.Input(id= 'n_pos', value = 41197701, type = 'number',    
+    #           style= dict(
+    #       width='30%',
+    #       verticalAlign="left"
+    #             )),
 
-    html.Label('Alteration: Reference -> Mutation (e.g. G-C)'),
-    dcc.Input(id= 'alt', value = 'G-C' , type = 'text', placeholder = 'G-C'),
-
-    html.Label('Basic Health Info: Check if you have'),
-    html.Div(
-      #style={'width':'10%', 'height':'100%','float':'left'},
-      children = [
-          dcc.Checklist(
-            id= 'obese-hist',
-            options = [
-            {'label': 'Severe obsesity', 'value': 'obese'},
-            {'label': 'Family history', 'value': 'fam_his'}],
-            value = ['default'],
-            labelStyle = {'display': 'block'}),
-      ]),
-    html.Div(id='prs'),
-    dcc.Slider(
-      id = 'prs-slider',
-      min=-5,
-      max=5,
-      step = 0.1,
-      marks={i/2: str(i/2) for i in range(-10,12)},
-
-      #marks={i/10: 'Label {}'.format(i/10) for i in range(0,50)},
-      value=0,
-    ),
-    
-    dcc.Graph(
-        id='survival-plot',
-        config={
-                'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
-                                           'pan2d', 'toggleSpikelines',
-                                           'hoverCompareCartesian',
-                                           'zoomOut2d', 'zoomIn2d',
-                                           'hoverClosestCartesian',
-                                           # 'sendDataToCloud',
-                                           'resetScale2d']
-        }),
-
-            
-    html.P(
-
-        dcc.Graph(
-        id='covariate-plot',
-        config={
-                'modeBarButtonsToRemove': ['autoScale2d', 'select2d', 'zoom2d',
-                                           'pan2d', 'toggleSpikelines',
-                                           'hoverCompareCartesian',
-                                           'zoomOut2d', 'zoomIn2d',
-                                           'hoverClosestCartesian',
-                                           # 'sendDataToCloud',
-                                           'resetScale2d']
-        },
-        style = {'width': 1000 })
-       )
-    ])
+    # html.Label('Alteration: Reference -> Mutation (e.g. G>A)'),
+    # dcc.Input(id= 'alt', value = 'G>A' , type = 'text', 
+    #           style= dict(
+    #       width='30%',
+    #       verticalAlign="left"
+   #             )),
+    #html.Label('Basic Health Info: Check if you have'),

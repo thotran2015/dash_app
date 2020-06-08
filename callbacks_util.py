@@ -6,13 +6,13 @@ Created on Thu Feb  6 20:31:27 2020
 @author: thotran
 """
 import pandas as pd
-import numpy as np
 import pickle 
-import requests
 import process_input as pi
+import numpy as np
 
-GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 9, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
-MUTATION_TYPES = {'synonymous_variant':'Silent', 'missense_variant': 'Missense', 'nonsense_variant':'Nonsense'}
+
+
+GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 3, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
 CONSEQ = {"Silent", "Nonsense", "Missense", "Deletion", "Frameshift", "Insertion/Deletion"}
 POLYGENETIC_OPTIONS = ['Family History', 'obese']
 GENE_TO_DISEASE = {'BC': ['BRCA1', 'BRCA2'], 'CC': ['MSH2', 'MSH6', 'PMS2', 'MLH1'], 'CAD': ['LDLR', 'APOB', 'PCSK9']}
@@ -22,6 +22,12 @@ GENE_TO_DISEASE = {'BC': ['BRCA1', 'BRCA2'], 'CC': ['MSH2', 'MSH6', 'PMS2', 'MLH
 PHENOTYPE_FILE = './data/phenotypes.json'
 PHENOTYPE_PAR = {'BC': ['PC1', 'PC2', 'PC3', 'PC4', 'gps_breastcancer'],
                 'CC': ['PC1', 'PC2', 'PC3', 'PC4', 'gps_ibd']}
+COVS1 = ['sex', 'Family History', 'PRS']
+COVS2 = ['Region 1', 'Region 2', 'Region 3', 'Region 4', 'Region 5']
+COVS3 = ['Missense', 'Silent', 'Nonsense', 'Frameshift', 'Insertion/Deletion']
+COVS4 = ['log Allele Frequency', 'Phylop', 'GERP', 'CADD']
+
+MUT_TYPES = ['Missense', 'Silent', 'Nonsense', 'Frameshift', 'Insertion/Deletion']
 
 #####################################
 ##### LOAD COXPH MODEL OBJECT #######
@@ -32,9 +38,7 @@ def load_model(model_loc):
         model = pickle.load(input_file) 
         return model
 
-#####################################
-###### SURVIVAL FUNCTION PLOT #######
-#####################################
+
         
     
 #####################################
@@ -44,7 +48,191 @@ def load_model(model_loc):
 VEP38_URL = 'https://rest.ensembl.org/vep/human/hgvs/'
 VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
         
+
     
+##################################################
+###### Process User Input from Interface #########
+##################################################
+
+def get_polygenetic_input(disease, polygenetic_selected, gene_selected, prs=None):
+    polygene = {option: 1 if option in polygenetic_selected else 0 for option in POLYGENETIC_OPTIONS}
+    if prs !=None:
+        polygene["PRS"] = prs
+    for gene in GENE_TO_DISEASE[disease]:
+        if gene == gene_selected: 
+            polygene[gene] = 1
+        else:
+            polygene[gene] = 0
+
+    return polygene
+
+
+##################################################
+###### Process Patient Phenotypes like PCs #########
+##################################################
+
+def get_phenotypes(disease, phenotype_file = PHENOTYPE_FILE):
+    df = pd.read_json(phenotype_file)
+    if disease in PHENOTYPE_PAR:
+        return df[PHENOTYPE_PAR[disease]].apply(pd.to_numeric).mean(axis = 0, skipna = True)
+    else:
+        return 'No Data in Phenotype File'
+
+#####################################
+###### SURVIVAL FUNCTION PLOT #######
+#####################################
+        
+def get_survival_callback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex, prs, model): 
+    pat_data = pi.get_pat_data(gene, mut_type, chrom, start, end, ref, alt, dis_tab, sex , obese_hist, VEP37_URL)
+    model_input = pi.process_patient_data(pat_data, model).fillna(0)
+    surv = model.predict_survival_function(model_input)[0]
+    baseline = model.baseline_survival_['baseline survival']
+    def plot_survival_func():
+        data = [
+        {'x': baseline.keys(), 'y': baseline.values, 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
+        {'x': surv.keys(), 'y': surv.values, 'type': 'line', 'name': 'individual', 'marker': dict(color='rgb(26, 118, 255)') }
+            ]
+        return {
+            'data': data,
+            'layout': {
+                    'title': 'Survival Probability of '+ dis_tab,
+                    'xaxis': {
+                        'title': 'Age',
+                        'type': 'linear' 
+                    },
+                    'yaxis' : {
+                        'title': 'Survival Probability',
+                        'type': 'linear' 
+                    },
+                },}
+    return plot_survival_func
+
+
+#####################################
+###### HAZARD RATIO PLOT ###
+#####################################
+
+
+def get_hazard_ratio(model, exp_coef = 'exp(coef)'):
+    lower_upper = model.confidence_intervals_
+    target = model.summary.get(exp_coef)
+    df = pd.DataFrame([np.exp(lower_upper.iloc[:,0]), target, np.exp(lower_upper.iloc[:,1])])
+    return {col: list(df[col].values) for col in df.columns}
+
+def get_hazard_ratios_callback(model):
+    ph_ratios = get_hazard_ratio(model)
+    cov_grps = [COVS1, COVS2, COVS3, COVS4]
+    def fill_ph_ratios_plot(ph_data, title):
+        return {'data': ph_data,
+                 'layout': { 
+                     'title' : title,
+                     'xaxis': {
+                         'title': 'Relative Risk or Hazard Ratio',
+                         #'type': 'linear',
+                         'automargin': True
+        
+                         },
+                     'yaxis' : {
+                         'type': 'category',
+                         'automargin': True
+                         },
+                     'legend': {
+                         'orientation': 'h',
+                         'xanchor':'right',
+                         'yanchor':'center'
+                         },
+                     }} 
+
+    def plot_box_plot_coef(cov_grps = cov_grps):
+        ph_ratios_plots = []
+        for cov in cov_grps:
+            ph_data = [
+              {'x': [xy[1]], 'y': [i], 'type': 'scatter', 'name': i, 'mode':'markers', 'showlegend': False,
+               'error_x': {
+                   'type': 'data',
+                   'symmetric': False,
+                   'array': [xy[2]-xy[0]],
+                   'arrayminus':[xy[1]-xy[0]]}, 
+                  } for i, xy in ph_ratios.items() if i in cov
+              ]
+            ph_ratios_plots.append(fill_ph_ratios_plot(ph_data, 'Relative Risk or Hazard Ratio of ' + ', '.join(cov)))
+        return ph_ratios_plots
+    return plot_box_plot_coef
+
+
+#####################################
+###### COVARIATE GROUPS PLOT ########
+#####################################
+    
+def get_plot_layout(title, xlabel, ylabel):
+    return { 
+            'title' : title,
+            'xaxis': {
+                'title': xlabel,
+                'type': 'linear' 
+                },
+            'yaxis' : {
+                'title': ylabel,
+                'type': 'linear' 
+                }
+            }
+
+def get_covariate_groups(model, model_input, covariate, val_range):
+    if covariate =='Mutations':
+        mut_types = list(set(MUT_TYPES) & set(model.summary.index))
+        pat_label = 'Patient\'s: ' + str(model_input[mut_types].idxmax())
+        cov_grps = pd.DataFrame(model_input, columns = [pat_label])
+        for val in mut_types:
+            cov_grps[val] = cov_grps[pat_label]
+            cov_grps[val][mut_types] = 0
+            cov_grps[val][val] = 1
+        return model.predict_survival_function(cov_grps.T)
+    else:
+        pat_label = 'Patient\'s: ' + str(round(model_input[covariate], 2))
+        cov_grps = pd.DataFrame(model_input, columns = [pat_label])
+        for val in val_range:
+            cov_grps[covariate + '=' + str(val)] = cov_grps[pat_label]
+            cov_grps[covariate + '=' + str(val)][covariate] = val
+        return model.predict_survival_function(cov_grps.T)
+    
+
+
+
+def get_covariate_grps_callback(covariate, val_range, dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex, prs, model):
+    pat_data = pi.get_pat_data(gene, mut_type, chrom, start, end, ref, alt, dis_tab, sex , obese_hist, VEP37_URL)
+    model_input = pi.process_patient_data(pat_data, model).fillna(0)
+    covariate_groups = get_covariate_groups(model, model_input, covariate, val_range= val_range)
+    print(covariate_groups)
+    
+    def fill_covariate_groups(cov_data, layout):
+        return {'data': cov_data,
+                'layout': layout
+                }  
+    def plot_covariate_groups():
+        cov_data = [
+             {'x': covariate_groups.index, 'y': covariate_groups[cov_val], 'type': 'line', 'name':str( cov_val)}
+             for cov_val in covariate_groups.columns
+             ]
+        layout = get_plot_layout('Survival based on '+ covariate, 'Age', 'Survival Probability')
+        return fill_covariate_groups(cov_data,layout)
+    return plot_covariate_groups
+
+
+
+
+# def process_model_input(dis_tab, gene, n_pos, alt, obese_hist, prs, model):
+#     variant = id_variant(gene, n_pos, alt)
+#     var_args = extract_var_covs_from_VEP(variant)
+#     input_args = get_polygenetic_input(dis_tab, obese_hist, gene, prs)
+#     phenotype_args = get_phenotypes(dis_tab)
+#     all_args = {**var_args, **input_args, **phenotype_args}
+#     labels = model.summary.index
+#     data = [float(all_args.get(i, 0)) for i in labels]
+#     df = pd.DataFrame({'patient': data})
+#     df['labels'] = labels
+#     df = df.set_index('labels').T
+#     return df
+
 
 
 # def set_mutation_type_binary_vector(var_type, mut_types = MUTATION_TYPES, conseq = CONSEQ):
@@ -92,164 +280,15 @@ VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
 #         info['log Allele Frequency'] = 3e-6
 
 #     return info
-
-
     
-##################################################
-###### Process User Input from Interface #########
-##################################################
-
-def get_polygenetic_input(disease, polygenetic_selected, gene_selected, prs=None):
-    polygene = {option: 1 if option in polygenetic_selected else 0 for option in POLYGENETIC_OPTIONS}
-    if prs !=None:
-        polygene["PRS"] = prs
-
-    for gene in GENE_TO_DISEASE[disease]:
-        if gene == gene_selected: 
-            polygene[gene] = 1
-        else:
-            polygene[gene] = 0
-
-    return polygene
-
-
-##################################################
-###### Process Patient Phenotypes like PCs #########
-##################################################
-
-def get_phenotypes(disease, phenotype_file = PHENOTYPE_FILE):
-    df = pd.read_json(phenotype_file)
-    if disease in PHENOTYPE_PAR:
-        return df[PHENOTYPE_PAR[disease]].apply(pd.to_numeric).mean(axis = 0, skipna = True)
-    else:
-        return 'No Data in Phenotype File'
-
-
-# def process_model_input(dis_tab, gene, n_pos, alt, obese_hist, prs, model):
-#     variant = id_variant(gene, n_pos, alt)
-#     var_args = extract_var_covs_from_VEP(variant)
-#     input_args = get_polygenetic_input(dis_tab, obese_hist, gene, prs)
-#     phenotype_args = get_phenotypes(dis_tab)
-#     all_args = {**var_args, **input_args, **phenotype_args}
-#     labels = model.summary.index
-#     data = [float(all_args.get(i, 0)) for i in labels]
-#     df = pd.DataFrame({'patient': data})
-#     df['labels'] = labels
-#     df = df.set_index('labels').T
-#     return df
-
-
-def get_survival_callback(dis_tab, gene, n_pos, alt, obese_hist, prs, model): 
-    #patient_data = get_patient_data(dis_tab, gene, n_pos, alt, obese_hist, prs, model)
-    sex = 'F'
-    pat_data = pi.get_pat_data(gene, n_pos, alt, dis_tab, sex , obese_hist, VEP37_URL)
-    model_input = pi.process_patient_data(pat_data, model)
-    surv = model.predict_survival_function(model_input)[0]
-    baseline = model.baseline_survival_['baseline survival']
-    def plot_survival_func():
-        data = [
-        {'x': baseline.keys(), 'y': baseline.values, 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
-        {'x': surv.keys(), 'y': surv.values, 'type': 'line', 'name': 'individual', 'marker': dict(color='rgb(26, 118, 255)') }
-            ]
-        return {
-            'data': data,
-            'layout': {
-                    'title': 'Survival Probability of '+ dis_tab,
-                    'xaxis': {
-                        'title': 'Age',
-                        'type': 'linear' 
-                    },
-                    'yaxis' : {
-                        'title': 'Survival Probability',
-                        'type': 'linear' 
-                    },
-                },}
-    return plot_survival_func
-
-
-#####################################
-###### PARTIAL HARZARD RATIO PLOT ###
-#####################################
-
-
-def get_partial_hazard_ratio(model, low_95= 'lower 0.95', high_95 = 'upper 0.95', exp_coef = 'exp(coef)'):
-    lower = model.summary[low_95]
-    upper = model.summary[high_95]
-    target = model.summary[exp_coef]
-    df = pd.DataFrame([lower, target, upper])
-    return {col: list(df[col].values) for col in df.columns}
-
-def get_ph_ratios_callback(model):
-    ph_ratios = get_partial_hazard_ratio(model)
-    chunk_size = len(model.summary.index)//4
-    covs1 = model.summary.index[0:chunk_size]
-    covs2 = model.summary.index[chunk_size:2*chunk_size]
-    covs3 = model.summary.index[2*chunk_size:3*chunk_size]
-    covs4 = model.summary.index[3*chunk_size:4*chunk_size]
-    cov_grps = [covs1, covs2, covs3, covs4]
-    def fill_ph_ratios_plot(ph_data, title):
-        return {'data': ph_data,
-                 'layout': { 
-                     'title' : title,
-                     'xaxis': {
-                         'title': 'Hazard Ratio',
-                         'type': 'linear',
-                         'automargin': True
+        #[for val in val_range]
+           
+        #axes2 = model.plot_covariate_groups(covariate, values=val_range, cmap='coolwarm', label = 'covs', plot_baseline=False)
+        #lines = axes2.get_lines()
+        #axes2.clear()
         
-                         },
-                     'yaxis' : {
-                         'type': 'category',
-                         'automargin': True
-                         
-                
-                         },
-                     'legend': {
-                         'orientation': 'h',
-                         'xanchor':'right',
-                         'yanchor':'center'
-                         },
-                     }} 
-
-    def plot_box_plot_coef(cov_grps = cov_grps):
-        ph_ratios_plots = []
-        for cov in cov_grps:
-            ph_data = [
-              {'x': [xy[1]], 'y': [i], 'type': 'scatter', 'name': i, 'mode':'markers', 'showlegend': False,
-               'error_x': {
-                   'type': 'data',
-                   'symmetric': False,
-                   'array': [xy[2]-xy[0]],
-                   'arrayminus':[xy[1]-xy[0]]}, 
-                  } for i, xy in ph_ratios.items() if i in cov
-              ]
-            ph_ratios_plots.append(fill_ph_ratios_plot(ph_data, 'Partial Hazard Ratios of Covariates'))
-        return ph_ratios_plots
-    return plot_box_plot_coef
-
-
-#####################################
-###### COVARIATE GROUPS PLOT ########
-#####################################
-    
-def get_plot_layout(title, xlabel, ylabel):
-    return { 
-            'title' : title,
-            'xaxis': {
-                'title': xlabel,
-                'type': 'linear' 
-                },
-            'yaxis' : {
-                'title': ylabel,
-                'type': 'linear' 
-                },
-            }
-
-def get_covariate_groups(model, covariate, val_range):
-    if covariate in model.summary.index: 
-        axes2 = model.plot_covariate_groups(covariate, values=val_range, cmap='coolwarm', label = 'covs', plot_baseline=False)
-        lines = axes2.get_lines()
-        axes2.clear()
-    return {i.get_label(): i.get_data() for i in lines}
+        #print('covs:', model.predict_survival_function(covariate))
+    #return {i.get_label(): i.get_data() for i in lines}
 
 
 # covariates = ['log Allele Frequency', 'Phylop', 'GERP', 'CADD', 'Missense',
@@ -267,33 +306,3 @@ def get_covariate_groups(model, covariate, val_range):
 #        'PC2': np.arange(0, 6, 2), 'PC3': np.arange(-5, 1, 2), 'PC4': np.arange(-3, 6, 2), 
 #        'Family History': np.arange(0,2), 'Region 1': np.arange(0,2),
 #        'Region 2': np.arange(0,2), 'Region 3': np.arange(0,2), 'Region 4': np.arange(0,2), 'Region 5': np.arange(0,2)}
-
-
-def get_covariate_grps_callback(cov, val_range, model):
-    covariate= cov
-    if cov =='type':
-        covariate= ['Silent', 'Nonsense', 'Frameshift', 'Insertion/Deletion']
-    
-    covariate_groups = get_covariate_groups(model, covariate, val_range= val_range)
-    print(covariate_groups)
-    def fill_covariate_groups(cov_data, layout):
-        return {'data': cov_data,
-                'layout': layout
-                }  
-    def plot_covariate_groups():
-        cov_data = [
-             {'x': xy[0], 'y': xy[1], 'type': 'line', 'name': label, }
-             for i, (label, xy) in enumerate(covariate_groups.items())
-             ]
-        layout = get_plot_layout('Survival based on '+ cov, 'Age', 'HR')
-        return fill_covariate_groups(cov_data,layout)
-    return plot_covariate_groups
-
-
-model_loc = './models/MLH1_model.pickle'
-#'BRCA2_10_31.pickle'
-
-MODEL = load_model(model_loc)
-
-#print(MODEL.plot_covariate_groups('Region 5', values= np.arange(0,3)))
-#print(get_covariate_groups(MODEL, 'Family History', np.arange(0,2)))

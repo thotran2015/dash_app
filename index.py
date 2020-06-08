@@ -4,64 +4,10 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 #app, view, controller  and model modules
-#import callbacks
-from app import app, server
+from app import app
 from layouts import layout1, layout2, layout3
 import callbacks
-#from computation import get_survival_prob
-import requests
-import sys
 
-# import rpy2
-# import rpy2.robjects as robjects
-# from rpy2.robjects.packages import importr
-# # import R's "base" package
-# base = importr('base')
-# # import R's "utils" package
-# utils = importr('utils')
-# # select a mirror for R packages
-# #utils.chooseCRANmirror(ind=1) # select the first mirror in the list
-# # R package names
-# #packnames = ('ggplot2', 'hexbin')
-# survival = importr('survival')
-#print(survival.coxph())
-
-
-
-# pydata stack
-#import pandas as pd
-#from sqlalchemy import create_engine
-#import psycopg2
-#import requests, sys
-
-# set params
-##DATABASE_URL = 'postgres://duozofkhzsfjvy:46ef1e44c2b9751801126174b41e124a7f1c847b9e0cf2f27af49a0a3278d5db@ec2-54-235-89-123.compute-1.amazonaws.com:5432/da1e3uq86ab5tu'
-###conn = create_engine(DATABASE_URL)
-vep_server =  "https://grch37.rest.ensembl.org/"
-##
-##
-ext = "/vep/human/hgvs/"
-##
-reg_ext = "/vep/human/region/"
-##reg_variant = "1:156084729:156084729:1/A"
-##
-###"1:6524705:6524705/T?"
-#s_variant = '9:g.22125504G>C'
-#variant = '1:g.156084756C>T'
-variant = '17:g.41197701G>A'
-reg_variant = "1:156084756:156084756:1/A"
-#'1:g.156084729G>A'
-##AGT:c.803T>C
-##opt_par ='?CADD=1?'
-##
-api_url = vep_server+ext+variant
-api_url_ext = vep_server + reg_ext + reg_variant
-
-
-
-
-#1-156084729-G-A
-#1-156084750-C-T
 
 ###########################
 # Data Manipulation / Model
@@ -74,16 +20,32 @@ api_url_ext = vep_server + reg_ext + reg_variant
 
 # Set up Dashboard and create layout
 
-app.layout = html.Div(children =[
-    html.H1(children = 'Risk Calculator for Coronary Artery Disease, Breast Cancer, or Colorectal Cancer',
-             style = {'text-align': 'center'}),
-    dcc.Tabs(id="tabs", value='BC', children=[
+# app.layout = html.Div(
+#     id = 'header', className = 'row',
+#     children =[ html.H1(children = 'Risk Calculator for Coronary Artery Disease, Breast Cancer, or Colorectal Cancer',
+#              style = {'text-align': 'center'}),
+    
+#     dcc.Tabs(id="tabs", value='BC', children=[
+#         dcc.Tab(label='Coronary Artery Disease', value='CAD'),
+#         dcc.Tab(label='Breast Cancer', value='BC'),
+#         dcc.Tab(label='Colorectal Cancer', value= 'CC')
+#     ]), 
+#     html.Div(id='page-content')
+#     ])
+
+
+app.layout = html.Div(children = [
+    html.Div(html.H1('Risk Calculator for Coronary Artery Disease, Breast Cancer, or Colorectal Cancer'),
+             style = {'text-align': 'center', 'padding': '1%'}, id = 'header', className = 'row'),
+    html.Div(    
+        dcc.Tabs(id="tabs", value='CC', 
+        children=[
         dcc.Tab(label='Coronary Artery Disease', value='CAD'),
         dcc.Tab(label='Breast Cancer', value='BC'),
         dcc.Tab(label='Colorectal Cancer', value= 'CC')
-    ]), 
-    html.Div(id='page-content')
-    ])
+        ]), style = dict(padding = '2%'), id = 'disease-page', className = 'row' ),
+    html.Div(id='page-content',  style = dict(padding = '2%', backgroundColor = 'lightgrey'),)
+        ])
 
 #############################################
 # Interaction Between Components / Controller
@@ -93,22 +55,14 @@ app.layout = html.Div(children =[
                  [Input(component_id = 'tabs', component_property = 'value')])
 def render_tab_title(tab):
     if tab =='CAD':
-        return layout2
+        return layout1
     elif tab == 'BC':
         return layout2
     elif tab == 'CC':
-        return layout2
+        return layout3
 
     
 # start Flask server
 if __name__ == '__main__':
-    # print('url:', api_url)
-    # r = requests.get(api_url, headers={ "Content-Type" : "application/json"})
-    # if not r.ok:
-    #      r.raise_for_status()
-    #      sys.exit()
- 
-    # decoded = r.json()[0]
-    #print(repr(decoded))
     app.run_server(debug = True)
 

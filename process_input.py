@@ -5,7 +5,6 @@ Created on Fri Jan 31 14:22:48 2020
 
 @author: thotran
 """
-import pickle
 import pandas as pd
 
 import query_variant_data as q
@@ -34,20 +33,13 @@ INPUT_PAR ={'BC': BC_PAR, 'CC':COLREC_PAR, 'CAD': COR_ARTERY_PAR }
 ###### Process Variant Input from VEP ############
 ##################################################
 
-def get_variant_data(gene, n_pos, alt, vep_url):
-    variant = q.id_variant(gene, n_pos, alt)
-    data = q.request_var_data(variant, vep_url)
-    if data == 'timeout':
-        print(data)
-    covariates = ev.extract_variant_attributes(data)
-    return pd.Series(covariates)
 
-def get_pat_data(gene, n_pos, alt, disease, sex, other, vep_url):
-    variant = q.id_variant(gene, n_pos, alt)
+def get_pat_data(gene, mut_type, chrom, start, end, ref, alt, disease, sex, other, vep_url):
+    variant = q.id_variant(mut_type, chrom, start, end, ref, alt)
     data = q.request_var_data(variant, vep_url)
     if data == 'timeout':
         print(data)
-    covariates = ev.extract_variant_attributes(data)
+    covariates = ev.extract_variant_attributes(data, gene, mut_type, ref, alt)
     ind = ei.extract_ind_data(disease, other, gene, sex)
     pat_data = {**covariates, **ind}
     return pat_data
@@ -65,13 +57,13 @@ def process_patient_data(pat_data, model):
 
 
 # Example 1: Get Raw Unprocessed Data from VEP
-variant = q.id_variant('MLH1', 37070280, 'G>A')
-data = q.request_var_data(variant, VEP37_URL)
-print(data)
+# variant = q.id_variant('MLH1', 37070280, 'G>A')
+# data = q.request_var_data(variant, VEP37_URL)
+# print(data)
     
 
 # Example 2: Get pre-processed variant data 
-print(get_variant_data('MLH1', 37070280, 'G>A', VEP37_URL))
+# print(get_variant_data('MLH1', 37070280, 'G>A', VEP37_URL))
     
         
     

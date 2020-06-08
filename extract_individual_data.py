@@ -15,8 +15,8 @@ SEX = {'M': 1, 'F': 0}
 ########################################
 PHENOTYPE_FILE = './data/phenotypes.json'
 PHENOTYPE_PAR = {'BC': ['PC1', 'PC2', 'PC3', 'PC4', 'gps_breastcancer'],
-                'CC': ['PC1', 'PC2', 'PC3', 'PC4', 'gps_ibd']}
-
+                'CC': ['PC1', 'PC2', 'PC3', 'PC4', 'gps_ibd'],
+                'CAD': ['PC1', 'PC2', 'PC3', 'PC4', 'gps_cad']}
 
 ##################################################
 ###### Extract User Input from Interface #########
@@ -26,7 +26,6 @@ def get_polygenetic_input(disease, polygenetic_selected, gene_selected, prs=0):
     polygene = {option: 1 if option in polygenetic_selected else 0 for option in POLYGENETIC_OPTIONS}
     if prs !=None:
         polygene["PRS"] = prs
-
     for gene in GENE_TO_DISEASE[disease]:
         if gene == gene_selected: 
             polygene[gene] = 1
@@ -43,7 +42,7 @@ def get_phenotypes(disease, phenotype_file = PHENOTYPE_FILE):
     df = pd.read_json(phenotype_file)
     if disease in PHENOTYPE_PAR:
         phenos = df[PHENOTYPE_PAR[disease]].apply(pd.to_numeric).mean(axis = 0, skipna = True)
-        return phenos.rename(index = {'gps_breastcancer': 'GPS', 'gps_ibd': 'GPS'})
+        return phenos.rename(index = {'gps_breastcancer': 'GPS', 'gps_ibd': 'GPS', 'gps_cad': 'GPS'})
     else:
         return 'No Data in Phenotype File'
     
