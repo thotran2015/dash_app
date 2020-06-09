@@ -41,7 +41,7 @@ app.layout = html.Div(children = [
     html.Div(html.H1('Risk Calculator for Coronary Artery Disease, Breast Cancer, or Colorectal Cancer'),
              style = {'text-align': 'center', 'padding': '1%'}, id = 'header', className = 'row'),
     html.Div(    
-        dcc.Tabs(id="tabs", value='CC', 
+        dcc.Tabs(id="tabs", value='CAD', 
         children=[
         dcc.Tab(label='Coronary Artery Disease', value='CAD'),
         dcc.Tab(label='Breast Cancer', value='BC'),

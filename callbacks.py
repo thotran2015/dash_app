@@ -36,7 +36,6 @@ GENE_MODELS = {'MLH1': MLH1_MODEL, 'BRCA2': BRCA2_MODEL, 'BRCA1': BRCA2_MODEL, '
 
 VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
 
-
 #####################################
 ###### SURVIVAL FUNCTION PLOT #######
 #####################################

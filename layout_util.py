@@ -26,7 +26,7 @@ DEFAULT_VARIANTS = {'breast cancer': {'chrom': 13, 'mut_type': 'Insertion', 'gen
                                                           {'label': 'LDLR', 'value': 'LDLR'},
                                                           {'label': 'APOB', 'value': 'APOB'},
                                                           {'label': 'PCSK9', 'value': 'PCSK9'}],
-                                        'start_pos': 11200228, 'end_pos': 11200228, 'ref': 'G', 'alt': 'C'},
+                                        'start_pos': 11200282, 'end_pos': 11200282, 'ref': 'G', 'alt': 'A'},
                     }
 
 BASE_MENU =  [html.Label('Sex'),

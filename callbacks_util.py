@@ -84,6 +84,9 @@ def get_phenotypes(disease, phenotype_file = PHENOTYPE_FILE):
 def get_survival_callback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex, prs, model):
     pat_data = pi.get_pat_data(gene, mut_type, chrom, start, end, ref, alt, dis_tab, sex , obese_hist, VEP37_URL)
     baseline = model.baseline_survival_['baseline survival']
+    #print('baseline: ')
+    #print(baseline)
+    baseline = baseline[baseline.index >= 0]
     if len(pat_data) == 0:
         def plot_survival_func():
             data = [
@@ -105,7 +108,9 @@ def get_survival_callback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, 
     else:
         model_input = pi.process_patient_data(pat_data, model).fillna(0)
         surv = model.predict_survival_function(model_input)[0]
-        #baseline = model.baseline_survival_['baseline survival']
+        #print('surv: ')
+        #print(surv)
+        surv = surv[surv.index >= 0]
         def plot_survival_func():
             data = [
             {'x': baseline.keys(), 'y': baseline.values, 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
@@ -135,7 +140,7 @@ def get_survival_callback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, 
 def get_hazard_ratio(model, exp_coef = 'exp(coef)'):
     lower_upper = model.confidence_intervals_
     target = model.summary.get(exp_coef)
-    df = pd.DataFrame([np.exp(lower_upper.iloc[:,0]), target, np.exp(lower_upper.iloc[:,1])])
+    df = pd.DataFrame([lower_upper.iloc[:,0], target, lower_upper.iloc[:,1]])
     return {col: list(df[col].values) for col in df.columns}
 
 def get_hazard_ratios_callback(model):
