@@ -140,7 +140,7 @@ def get_survival_callback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, 
 def get_hazard_ratio(model, exp_coef = 'exp(coef)'):
     lower_upper = model.confidence_intervals_
     target = model.summary.get(exp_coef)
-    df = pd.DataFrame([lower_upper.iloc[:,0], target, lower_upper.iloc[:,1]])
+    df = pd.DataFrame([np.exp(lower_upper.iloc[:,0]), target, np.exp(lower_upper.iloc[:,1])])
     return {col: list(df[col].values) for col in df.columns}
 
 def get_hazard_ratios_callback(model):
@@ -210,14 +210,16 @@ def get_covariate_groups(model, model_input, covariate, val_range):
             cov_grps[val] = cov_grps[pat_label]
             cov_grps[val][mut_types] = 0
             cov_grps[val][val] = 1
-        return model.predict_survival_function(cov_grps.T)
+        survival = model.predict_survival_function(cov_grps.T)
+        return survival[survival.index>0]
     else:
         pat_label = 'Patient\'s: ' + str(round(model_input[covariate], 2))
         cov_grps = pd.DataFrame(model_input, columns = [pat_label])
         for val in val_range:
             cov_grps[covariate + '=' + str(val)] = cov_grps[pat_label]
             cov_grps[covariate + '=' + str(val)][covariate] = val
-        return model.predict_survival_function(cov_grps.T)
+        survival =  model.predict_survival_function(cov_grps.T)
+        return survival[survival.index>0]
     
 
 
