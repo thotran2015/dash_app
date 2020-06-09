@@ -57,15 +57,14 @@ def request_var_data(variant, vep_url):
         print(api_url)
         r = requests.get(api_url, headers={ "Content-Type" : "application/json"}, verify=False, timeout=25)
         if not r.ok:
-            r.raise_for_status()
-            sys.exit()
             return "Bad request"
-        
+            #r.raise_for_status()
+            #sys.exit()
+            #return "Bad request"
         decoded = r.json()[0]
         with open(path, 'w') as fp:
             json.dump(decoded, fp)
         return decoded
-    
     except requests.exceptions.Timeout:
         return "timeout"
 

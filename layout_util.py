@@ -52,7 +52,7 @@ BASE_MENU =  [html.Label('Sex'),
 def get_mutation_menu(disease):
     vals = DEFAULT_VARIANTS.get(disease)
     return [
-        html.Label('Please, input your variant and health information below.'),
+        html.P('Please, input your variant and health information below.', id = 'feedback'),
               html.Label('Gene'),
               dcc.Dropdown(id = 'gene', value=vals['gene'], 
       options = vals['gene_options'],
@@ -90,15 +90,13 @@ def get_mutation_menu(disease):
     dcc.Input(id= 'alt', value = vals['alt'] , type = 'text', 
               style= dict(
           width='30%',
-                )),]
+                )),
+    ]
 
 
 
 def setup_default_menu(disease):
     return html.Div(get_mutation_menu(disease) + BASE_MENU, style = dict(padding='5%'))
-
-    #elif disease == 'colorectal cancer':
-        #return get_mutation_menu(disease) + BASE_MENU
 
 def setup_survival_plot():
     return dcc.Graph(

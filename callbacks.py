@@ -2,7 +2,7 @@ from dash.dependencies import Input, Output
 from app import app
 import numpy as np
 from callbacks_util import load_model, get_covariate_grps_callback, get_hazard_ratios_callback, get_survival_callback
-
+from process_input import get_pat_data 
 
 #############################################
 # Interaction Between Components / Controller
@@ -34,9 +34,32 @@ LDLR_MODEL = load_model(LDLR_MODEL_LOC)
 
 GENE_MODELS = {'MLH1': MLH1_MODEL, 'BRCA2': BRCA2_MODEL, 'BRCA1': BRCA2_MODEL, 'LDLR': LDLR_MODEL}
 
+VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
+
+
 #####################################
 ###### SURVIVAL FUNCTION PLOT #######
 #####################################
+        
+@app.callback(
+    Output('feedback', 'children'),
+    [Input(component_id='tabs', component_property='value'), 
+    Input(component_id='gene', component_property='value'), 
+    Input(component_id='mut_type', component_property='value'), 
+    Input(component_id='chrom', component_property='value'),
+    Input(component_id='start', component_property='value'),
+    Input(component_id='end', component_property='value'),
+    Input(component_id='ref', component_property='value'),
+    Input(component_id='alt', component_property='value'),
+    Input(component_id='obese-hist', component_property='value'), 
+    Input(component_id='sex', component_property='value')
+    ])
+def get_feedback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex):
+    pat_data = get_pat_data(gene, mut_type, chrom, start, end, ref, alt, dis_tab, sex,  obese_hist, VEP37_URL)
+    if len(pat_data) == 0:
+        return 'Your variant was not found in the database. Please, enter another variant.'
+    else:
+        return 'We successfully calculated your result!'
     
 
 @app.callback(
@@ -55,6 +78,7 @@ GENE_MODELS = {'MLH1': MLH1_MODEL, 'BRCA2': BRCA2_MODEL, 'BRCA1': BRCA2_MODEL, '
 def plot_survival_function(dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex, prs=0):
     model = GENE_MODELS[gene]
     return get_survival_callback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex, prs, model)()
+
     
 
 @app.callback(
@@ -106,6 +130,7 @@ def plot_covariates(dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_
     data = [get_covariate_grps_callback(cov, COVARIATES[cov], dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex, prs, model)() 
             for cov in COV_DISEASE[dis_tab]]
     return data
+
 
     
 

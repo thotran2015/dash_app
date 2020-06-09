@@ -70,34 +70,5 @@ layout2 = get_template_layout('breast cancer')
 # variant sample : 2-47630331-A-C
 layout3 = get_template_layout('colorectal cancer')
 
-
     
 layout1 = get_template_layout('coronary artery disease')
-
- # html.Div(id='test-output'),
-    # html.Label('Breast Cancer'),
-    # html.Label('Gene'),
-    # dcc.Dropdown(id = 'gene', value='BRCA1', 
-    #   options = [
-    #         {'label': 'BRCA 1', 'value': 'BRCA1'},
-    #         {'label': 'BRCA 2', 'value': 'BRCA2'}],
-    #   style= dict(
-    #       width='30%',
-    #       verticalAlign="left"
-    #             )),
-
-
-    # html.Label('Nucleotide Position (e.g. 41197701)'),
-    # dcc.Input(id= 'n_pos', value = 41197701, type = 'number',    
-    #           style= dict(
-    #       width='30%',
-    #       verticalAlign="left"
-    #             )),
-
-    # html.Label('Alteration: Reference -> Mutation (e.g. G>A)'),
-    # dcc.Input(id= 'alt', value = 'G>A' , type = 'text', 
-    #           style= dict(
-    #       width='30%',
-    #       verticalAlign="left"
-   #             )),
-    #html.Label('Basic Health Info: Check if you have'),

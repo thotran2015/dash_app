@@ -63,7 +63,6 @@ def get_polygenetic_input(disease, polygenetic_selected, gene_selected, prs=None
             polygene[gene] = 1
         else:
             polygene[gene] = 0
-
     return polygene
 
 
@@ -82,29 +81,49 @@ def get_phenotypes(disease, phenotype_file = PHENOTYPE_FILE):
 ###### SURVIVAL FUNCTION PLOT #######
 #####################################
         
-def get_survival_callback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex, prs, model): 
+def get_survival_callback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex, prs, model):
     pat_data = pi.get_pat_data(gene, mut_type, chrom, start, end, ref, alt, dis_tab, sex , obese_hist, VEP37_URL)
-    model_input = pi.process_patient_data(pat_data, model).fillna(0)
-    surv = model.predict_survival_function(model_input)[0]
     baseline = model.baseline_survival_['baseline survival']
-    def plot_survival_func():
-        data = [
-        {'x': baseline.keys(), 'y': baseline.values, 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
-        {'x': surv.keys(), 'y': surv.values, 'type': 'line', 'name': 'individual', 'marker': dict(color='rgb(26, 118, 255)') }
-            ]
-        return {
-            'data': data,
-            'layout': {
-                    'title': 'Survival Probability of '+ dis_tab,
-                    'xaxis': {
-                        'title': 'Age',
-                        'type': 'linear' 
-                    },
-                    'yaxis' : {
-                        'title': 'Survival Probability',
-                        'type': 'linear' 
-                    },
-                },}
+    if len(pat_data) == 0:
+        def plot_survival_func():
+            data = [
+            {'x': baseline.keys(), 'y': baseline.values, 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
+                ]
+            return {
+                'data': data,
+                'layout': {
+                        'title': 'Survival Probability of '+ dis_tab,
+                        'xaxis': {
+                            'title': 'Age',
+                            'type': 'linear' 
+                        },
+                        'yaxis' : {
+                            'title': 'Survival Probability',
+                            'type': 'linear' 
+                        },
+                    },}
+    else:
+        model_input = pi.process_patient_data(pat_data, model).fillna(0)
+        surv = model.predict_survival_function(model_input)[0]
+        #baseline = model.baseline_survival_['baseline survival']
+        def plot_survival_func():
+            data = [
+            {'x': baseline.keys(), 'y': baseline.values, 'type': 'line', 'name': 'baseline', 'marker': dict(color='rgb(55, 83, 109)') },
+            {'x': surv.keys(), 'y': surv.values, 'type': 'line', 'name': 'individual', 'marker': dict(color='rgb(26, 118, 255)') }
+                ]
+            return {
+                'data': data,
+                'layout': {
+                        'title': 'Survival Probability of '+ dis_tab,
+                        'xaxis': {
+                            'title': 'Age',
+                            'type': 'linear' 
+                        },
+                        'yaxis' : {
+                            'title': 'Survival Probability',
+                            'type': 'linear' 
+                        },
+                    },}
     return plot_survival_func
 
 
@@ -200,21 +219,23 @@ def get_covariate_groups(model, model_input, covariate, val_range):
 
 def get_covariate_grps_callback(covariate, val_range, dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex, prs, model):
     pat_data = pi.get_pat_data(gene, mut_type, chrom, start, end, ref, alt, dis_tab, sex , obese_hist, VEP37_URL)
-    model_input = pi.process_patient_data(pat_data, model).fillna(0)
-    covariate_groups = get_covariate_groups(model, model_input, covariate, val_range= val_range)
-    print(covariate_groups)
-    
-    def fill_covariate_groups(cov_data, layout):
-        return {'data': cov_data,
-                'layout': layout
-                }  
-    def plot_covariate_groups():
-        cov_data = [
-             {'x': covariate_groups.index, 'y': covariate_groups[cov_val], 'type': 'line', 'name':str( cov_val)}
-             for cov_val in covariate_groups.columns
-             ]
-        layout = get_plot_layout('Survival based on '+ covariate, 'Age', 'Survival Probability')
-        return fill_covariate_groups(cov_data,layout)
+    if len(pat_data) == 0:
+        def plot_covariate_groups():
+            return {}  
+    else:
+        model_input = pi.process_patient_data(pat_data, model).fillna(0)
+        covariate_groups = get_covariate_groups(model, model_input, covariate, val_range= val_range)
+        def fill_covariate_groups(cov_data, layout):
+            return {'data': cov_data,
+                    'layout': layout
+                    }  
+        def plot_covariate_groups():
+            cov_data = [
+                 {'x': covariate_groups.index, 'y': covariate_groups[cov_val], 'type': 'line', 'name':str( cov_val)}
+                 for cov_val in covariate_groups.columns
+                 ]
+            layout = get_plot_layout('Survival based on '+ covariate, 'Age', 'Survival Probability')
+            return fill_covariate_groups(cov_data,layout)
     return plot_covariate_groups
 
 

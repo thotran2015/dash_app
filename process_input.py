@@ -37,8 +37,8 @@ INPUT_PAR ={'BC': BC_PAR, 'CC':COLREC_PAR, 'CAD': COR_ARTERY_PAR }
 def get_pat_data(gene, mut_type, chrom, start, end, ref, alt, disease, sex, other, vep_url):
     variant = q.id_variant(mut_type, chrom, start, end, ref, alt)
     data = q.request_var_data(variant, vep_url)
-    if data == 'timeout':
-        print(data)
+    if data == 'timeout' or data == "Bad request":
+        return {}
     covariates = ev.extract_variant_attributes(data, gene, mut_type, ref, alt)
     ind = ei.extract_ind_data(disease, other, gene, sex)
     pat_data = {**covariates, **ind}
