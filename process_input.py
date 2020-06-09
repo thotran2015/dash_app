@@ -10,10 +10,12 @@ import pandas as pd
 import query_variant_data as q
 import extract_variant_data as ev
 import extract_individual_data as ei
+import query_sequence as q_seq
 
 
 VEP38_URL = 'https://rest.ensembl.org/vep/human/hgvs/'
 VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
+SEQ37_URL = "https://grch37.rest.ensembl.org/sequence/region/human/"
 
 BC_PAR = ['log Allele Frequency', 'Phylop', 'GERP', 'CADD', 'Missense',
        'Nonsense', 'Frameshift', 'Insertion/Deletion', 'Silent', 'Transition',
@@ -41,7 +43,8 @@ def get_pat_data(gene, mut_type, chrom, start, end, ref, alt, disease, sex, othe
         return {}
     covariates = ev.extract_variant_attributes(data, gene, mut_type, ref, alt)
     ind = ei.extract_ind_data(disease, other, gene, sex)
-    pat_data = {**covariates, **ind}
+    CpG = q_seq.get_CpG(start, SEQ37_URL)
+    pat_data = {**covariates, **CpG, **ind}
     return pat_data
 
 

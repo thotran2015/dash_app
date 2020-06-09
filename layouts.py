@@ -13,7 +13,7 @@ boxSha =  '5px 5px grey'
 
 COV_DISEASE = {'breast cancer': [['Family History', 'log Allele Frequency'], ['Mutations', 'PRS']],
                'colorectal cancer':  [['Family History', 'log Allele Frequency'], ['Mutations', 'sex']],
-               'coronary artery disease' : [['Family History', 'log Allele Frequency'], ['Mutations', 'PRS']]}
+               'coronary artery disease' : [['Family History', 'log Allele Frequency'], ['Mutations', 'sex']]}
 
 def get_template_layout(disease): 
     covariate_groups = COV_DISEASE[disease]

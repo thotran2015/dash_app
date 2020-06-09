@@ -13,7 +13,7 @@ DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary A
 #parameter value range for each covariate group
 COV_DISEASE = {'BC': ['Family History', 'log Allele Frequency', 'Mutations', 'PRS'],
                'CC':  ['Family History', 'log Allele Frequency', 'Mutations', 'sex'],
-               'CAD' : ['Family History', 'log Allele Frequency', 'Mutations', 'PRS']}
+               'CAD' : ['Family History', 'log Allele Frequency', 'Mutations', 'sex']}
 
 COVARIATES = {'log Allele Frequency':np.arange(0, 6, 1), 'Family History': np.arange(0,2), 'Mutations': np.arange(0,2), 'PRS': np.arange(0,3), 'sex': np.arange(0,2)}
 COV_OUTPUTS = [Output('covariate-plot-' + str(i), 'figure') for i in range(4)] 
@@ -36,6 +36,7 @@ GENE_MODELS = {'MLH1': MLH1_MODEL, 'BRCA2': BRCA2_MODEL, 'BRCA1': BRCA2_MODEL, '
 
 VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
 
+#print(LDLR_MODEL.summary['coef upper 95%'])
 #####################################
 ###### SURVIVAL FUNCTION PLOT #######
 #####################################
@@ -55,6 +56,7 @@ VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
     ])
 def get_feedback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex):
     pat_data = get_pat_data(gene, mut_type, chrom, start, end, ref, alt, dis_tab, sex,  obese_hist, VEP37_URL)
+    #print(pat_data)
     if len(pat_data) == 0:
         return 'Your variant was not found in the database. Please, enter another variant.'
     else:
