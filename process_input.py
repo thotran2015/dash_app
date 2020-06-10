@@ -43,7 +43,7 @@ def get_pat_data(gene, mut_type, chrom, start, end, ref, alt, disease, sex, othe
         return {}
     covariates = ev.extract_variant_attributes(data, gene, mut_type, ref, alt)
     ind = ei.extract_ind_data(disease, other, gene, sex)
-    CpG = q_seq.get_CpG(start, SEQ37_URL)
+    CpG = q_seq.get_CpG(start, ref, SEQ37_URL)
     pat_data = {**covariates, **CpG, **ind}
     return pat_data
 

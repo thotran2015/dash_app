@@ -11,9 +11,12 @@ import requests, sys
 
 SEQ37_URL = "https://grch37.rest.ensembl.org/sequence/region/human/"
 SEQ38_URL = 'https://rest.ensembl.org/sequence/region/human/'
-EXT = '?'
+EXT = ':1?'
+NEG_EXT = ':-1?'
 
-def request_sequence_data(region, seq_url):
+
+
+def request_sequence_data(region, seq_url, ext = EXT):
     path = './sequences/ensemble37/' + region + '.json'
     if seq_url == SEQ38_URL: 
         path = './sequences/ensemble38/' + region + '.json'
@@ -21,7 +24,7 @@ def request_sequence_data(region, seq_url):
         with open(path, 'r') as fp:
             return json.load(fp)
     try:
-        api_url = seq_url + region + EXT
+        api_url = seq_url + region + ext
         print(api_url)
         r = requests.get(api_url, headers={ "Content-Type" : "application/json"}, verify=False, timeout=25)
         if not r.ok:
@@ -38,12 +41,15 @@ def request_sequence_data(region, seq_url):
 
 
 def id_region(n_pos):
-    return 'X:'+ str(n_pos-1) +'..'+ str(n_pos+1) +':1'
+    return 'X:'+ str(n_pos-1) +'..'+ str(n_pos+1)
 
-def get_CpG(n_pos, seq_url):
+def get_CpG(n_pos, ref, seq_url):
     reg = id_region(n_pos)
     data = request_sequence_data(reg, seq_url)
     seq = data['seq']
+    if ref not in seq:
+        data = request_sequence_data(reg, seq_url, NEG_EXT)
+        seq = data['seq']
     if 'CG' in seq:
         return {'CpG Affecting': 1, 'Non CpG Affecting': 0}
     else:

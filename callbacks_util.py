@@ -84,8 +84,6 @@ def get_phenotypes(disease, phenotype_file = PHENOTYPE_FILE):
 def get_survival_callback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex, prs, model):
     pat_data = pi.get_pat_data(gene, mut_type, chrom, start, end, ref, alt, dis_tab, sex , obese_hist, VEP37_URL)
     baseline = model.baseline_survival_['baseline survival']
-    #print('baseline: ')
-    #print(baseline)
     baseline = baseline[baseline.index >= 0]
     if len(pat_data) == 0:
         def plot_survival_func():
@@ -108,8 +106,6 @@ def get_survival_callback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, 
     else:
         model_input = pi.process_patient_data(pat_data, model).fillna(0)
         surv = model.predict_survival_function(model_input)[0]
-        #print('surv: ')
-        #print(surv)
         surv = surv[surv.index >= 0]
         def plot_survival_func():
             data = [
@@ -201,10 +197,16 @@ def get_plot_layout(title, xlabel, ylabel):
                 }
             }
 
+SEXES = {0: 'Female', 1: 'Male'}
+FAM_HIST = {0: 'No Family History', 1: 'Family History'}
+LOG_ALLELE_FREQ = {}
+
+COV_GRP_LABELS = {'sex': SEXES, 'Family History': FAM_HIST}
+
 def get_covariate_groups(model, model_input, covariate, val_range):
     if covariate =='Mutations':
         mut_types = list(set(MUT_TYPES) & set(model.summary.index))
-        pat_label = 'Patient\'s: ' + str(model_input[mut_types].idxmax())
+        pat_label = 'Patient: ' + str(model_input[mut_types].idxmax())
         cov_grps = pd.DataFrame(model_input, columns = [pat_label])
         for val in mut_types:
             cov_grps[val] = cov_grps[pat_label]
@@ -213,11 +215,14 @@ def get_covariate_groups(model, model_input, covariate, val_range):
         survival = model.predict_survival_function(cov_grps.T)
         return survival[survival.index>0]
     else:
-        pat_label = 'Patient\'s: ' + str(round(model_input[covariate], 2))
+        cov_val_label = COV_GRP_LABELS.get(covariate, {})
+        pat_val = round(model_input[covariate], 2)
+        pat_label = 'Patient: ' + cov_val_label.get(int(pat_val)) if pat_val in cov_val_label else 'Patient: ' + str(pat_val)
         cov_grps = pd.DataFrame(model_input, columns = [pat_label])
         for val in val_range:
-            cov_grps[covariate + '=' + str(val)] = cov_grps[pat_label]
-            cov_grps[covariate + '=' + str(val)][covariate] = val
+            col_name = cov_val_label.get(val) if val in cov_val_label else covariate + ' = ' + str(val)
+            cov_grps[col_name] = cov_grps[pat_label]
+            cov_grps[col_name][covariate] = val
         survival =  model.predict_survival_function(cov_grps.T)
         return survival[survival.index>0]
     
