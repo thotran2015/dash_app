@@ -123,16 +123,17 @@ def get_hazard_ratios_callback(gene, model):
     def plot_box_plot_coef(cov_grps = cov_grps):
         ph_ratios_plots = []
         for cov in cov_grps:
+            cov_labels = sorted(list(set(cov) & set(model.summary.index)))
             ph_data = [
-              {'x': [xy[1]], 'y': [reg_labels.get(i, i)], 'type': 'scatter', 'name': i, 'mode':'markers', 'showlegend': False,
+              {'x': [ph_ratios[i][1]], 'y': [reg_labels.get(i, i).title()], 'type': 'scatter', 'name': i, 'mode':'markers', 'showlegend': False,
                'error_x': {
                    'type': 'data',
                    'symmetric': False,
-                   'array': [xy[2]-xy[0]],
-                   'arrayminus':[xy[1]-xy[0]]}, 
-                  } for i, xy in ph_ratios.items() if i in cov
+                   'array': [ph_ratios[i][2]-ph_ratios[i][0]],
+                   'arrayminus':[ph_ratios[i][1]-ph_ratios[i][0]]}, 
+                  } for i in cov_labels
               ]
-            ph_ratios_plots.append(fill_ph_ratios_plot(ph_data, 'Relative Risk or Hazard Ratio of ' + ', '.join(cov)))
+            ph_ratios_plots.append(fill_ph_ratios_plot(ph_data, 'Relative Risk or Hazard Ratio of ' + ', '.join(cov_labels)))
         return ph_ratios_plots
     return plot_box_plot_coef
 
