@@ -50,7 +50,7 @@ def get_template_layout(disease):
            id = 'menu-survival-curve', className = 'row', style = dict(backgroundColor = bgColor, padding = '2%', display ='flex')
             ),
     
-        ] + get_hazard_plots_layout(2,2) + get_cov_grp_plots_layout(disease)
+        ] +get_cov_grp_plots_layout(disease) + get_hazard_plots_layout(2,2)
 
 #Breast Cancer
 layout2 = get_template_layout('breast cancer')

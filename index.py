@@ -7,7 +7,7 @@ from dash.dependencies import Input, Output
 from app import app, server
 from layouts import layout1, layout2, layout3
 import callbacks
-import process_input as pi
+
 
 
 VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"

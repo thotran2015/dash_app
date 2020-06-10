@@ -16,9 +16,8 @@ COV_DISEASE = {'BC': ['Family History', 'log Allele Frequency', 'Mutations', 'Re
                'CC':  ['Family History', 'log Allele Frequency', 'Mutations', 'Regions'],
                'CAD' : ['Family History', 'log Allele Frequency', 'Mutations', 'Regions']}
 
-COVARIATES = {'log Allele Frequency':np.arange(0, 6, 1), 'Family History': np.arange(0,2), 'Mutations': np.arange(0,2), 'PRS': np.arange(0,3), 'sex': np.arange(0,2), 'Regions': np.arange(0,2)}
-
-
+COVARIATES = {'log Allele Frequency':np.arange(0, 6, 1), 'Family History': np.arange(0,2), 'Mutations': np.arange(0,2), 
+              'PRS': np.arange(0,3), 'sex': np.arange(0,2), 'Regions': np.arange(0,2)}
 GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 3, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
 
 BRCA2_MODEL_LOC = './models/BRCA2_10_31.pickle'
@@ -81,13 +80,6 @@ def plot_survival_function(dis_tab, gene, mut_type, chrom, start, end, ref, alt,
     model = GENE_MODELS[gene]
     return get_survival_callback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex, prs, model)()
 
-    
-
-@app.callback(
-    Output('prs', 'children'),
-    [Input('prs-slider', 'value')])
-def update_output(value):
-    return 'You have selected PRS of {}'.format(value)
 
 
 
@@ -105,7 +97,6 @@ def update_output(value):
 def plot_ph_ratios(tab, gene):
     model = GENE_MODELS[gene]
     return get_hazard_ratios_callback(gene, model)()
-    
     
 
 #####################################

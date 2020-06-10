@@ -9,39 +9,12 @@ import pandas as pd
 import pickle 
 import process_input as pi
 import numpy as np
-
-LDLR = [0, 431, 829, 1343, 1886, 2579]
-APOB = [0, 1830, 5116, 7605, 10238, 13679]
-PCSK9 = [0, 42, 286, 426, 1120, 2054]
-BRCA1 = [0, 966, 2028, 3188, 4427, 5560.0]
-BRCA2 = [0, 2049, 4058, 5879, 7738, 10171]
-MLH1 = [0, 322, 739, 1246, 1778, 2269.0]
-MSH2  = [0, 565, 1077, 1594, 2152, 2801]
-MSH6 = [0, 973, 1714, 2550, 3377, 4077]
-PMS2 = [0, 445, 1036, 1532, 2016, 2458.0]
-
-GENE_TO_BOUNDARIES = {'BRCA1' : BRCA1, 'BRCA2' : BRCA2, 'MSH2': MSH2, 'MSH6': MSH6, 'PMS2' : PMS2, 'MLH1': MLH1, 'LDLR': LDLR , 'APOB': APOB, 'PCSK9':PCSK9}
-
+from constants import VEP37_URL, GENE_TO_BOUNDARIES, DISEASES
+from constants import PERSONAL, REGIONS, MUT_TYPES, VAR_ATTR
 
 def label_region(gene):
     reg_bounds = GENE_TO_BOUNDARIES[gene]
     return {'Region '+ str(i+1): 'Region ' + str(i+1) + ' ('+ str(reg_bounds[i]) + '-'+ str(e) +')' for i, e in enumerate(reg_bounds[1:])}
-
-GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 3, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
-CONSEQ = {"Silent", "Nonsense", "Missense", "Deletion", "Frameshift", "Insertion/Deletion"}
-POLYGENETIC_OPTIONS = ['Family History', 'obese']
-GENE_TO_DISEASE = {'BC': ['BRCA1', 'BRCA2'], 'CC': ['MSH2', 'MSH6', 'PMS2', 'MLH1'], 'CAD': ['LDLR', 'APOB', 'PCSK9']}
-
-
-COVS1 = ['sex', 'Family History', 'PRS']
-REGIONS = ['Region 1', 'Region 2', 'Region 3', 'Region 4', 'Region 5']
-COVS3 = ['Missense', 'Silent', 'Nonsense', 'Frameshift', 'Insertion/Deletion']
-COVS4 = ['log Allele Frequency', 'Phylop', 'GERP', 'CADD']
-
-
-
-MUT_TYPES = ['Missense', 'Silent', 'Nonsense', 'Frameshift', 'Insertion/Deletion']
-DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary Artery Disease'}
 
 
 
@@ -49,9 +22,6 @@ SEXES = {0: 'Female', 1: 'Male'}
 FAM_HIST = {0: 'No Family History', 1: 'Family History'}
 COV_GRP_LABELS = {'sex': SEXES, 'Family History': FAM_HIST}
 
-VEP38_URL = 'https://rest.ensembl.org/vep/human/hgvs/'
-VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
-        
 #####################################
 ##### LOAD COXPH MODEL OBJECT #######
 #####################################
@@ -128,7 +98,7 @@ def get_hazard_ratio(model, exp_coef = 'exp(coef)'):
 def get_hazard_ratios_callback(gene, model):
     ph_ratios = get_hazard_ratio(model)
     reg_labels = label_region(gene)
-    cov_grps = [COVS1, REGIONS, COVS3, COVS4]
+    cov_grps = [PERSONAL, REGIONS, MUT_TYPES, VAR_ATTR]
     def fill_ph_ratios_plot(ph_data, title):
         return {'data': ph_data,
                  'layout': { 
