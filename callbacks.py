@@ -11,12 +11,13 @@ from process_input import get_pat_data
 #disease and their code names
 DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary Artery Disease'}
 #parameter value range for each covariate group
+COV_OUTPUTS = [Output('covariate-plot-' + str(i), 'figure') for i in range(4)] 
 COV_DISEASE = {'BC': ['Family History', 'log Allele Frequency', 'Mutations', 'PRS'],
                'CC':  ['Family History', 'log Allele Frequency', 'Mutations', 'sex'],
                'CAD' : ['Family History', 'log Allele Frequency', 'Mutations', 'sex']}
 
 COVARIATES = {'log Allele Frequency':np.arange(0, 6, 1), 'Family History': np.arange(0,2), 'Mutations': np.arange(0,2), 'PRS': np.arange(0,3), 'sex': np.arange(0,2)}
-COV_OUTPUTS = [Output('covariate-plot-' + str(i), 'figure') for i in range(4)] 
+
 
 GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 3, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
 
@@ -36,7 +37,7 @@ GENE_MODELS = {'MLH1': MLH1_MODEL, 'BRCA2': BRCA2_MODEL, 'BRCA1': BRCA2_MODEL, '
 
 VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
 
-#print(LDLR_MODEL.summary['coef upper 95%'])
+
 #####################################
 ###### SURVIVAL FUNCTION PLOT #######
 #####################################
@@ -103,7 +104,7 @@ def update_output(value):
     ])
 def plot_ph_ratios(tab, gene):
     model = GENE_MODELS[gene]
-    return get_hazard_ratios_callback(model)()
+    return get_hazard_ratios_callback(gene, model)()
     
     
 

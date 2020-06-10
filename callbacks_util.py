@@ -10,25 +10,52 @@ import pickle
 import process_input as pi
 import numpy as np
 
+LDLR = [0, 431, 829, 1343, 1886, 2579]
+APOB = [0, 1830, 5116, 7605, 10238, 13679]
+PCSK9 = [0, 42, 286, 426, 1120, 2054]
+BRCA1 = [0, 966, 2028, 3188, 4427, 5560.0]
+BRCA2 = [0, 2049, 4058, 5879, 7738, 10171]
+MLH1 = [0, 322, 739, 1246, 1778, 2269.0]
+MSH2  = [0, 565, 1077, 1594, 2152, 2801]
+MSH6 = [0, 973, 1714, 2550, 3377, 4077]
+PMS2 = [0, 445, 1036, 1532, 2016, 2458.0]
 
+GENE_TO_BOUNDARIES = {'BRCA1' : BRCA1, 'BRCA2' : BRCA2, 'MSH2': MSH2, 'MSH6': MSH6, 'PMS2' : PMS2, 'MLH1': MLH1, 'LDLR': LDLR , 'APOB': APOB, 'PCSK9':PCSK9}
+
+
+def label_region(gene):
+    reg_bounds = GENE_TO_BOUNDARIES[gene]
+    return {'Region '+ str(i+1): 'Region ' + str(i+1) + ' ('+ str(reg_bounds[i]) + '-'+ str(e) +')' for i, e in enumerate(reg_bounds[1:])}
+    # reg_labels = []
+    # for i, e in enumerate(reg_bounds[1:]):
+    #     reg_labels.append('Region ' + str(i+1) + ' ('+ str(reg_bounds[i]) + '-'+ str(e) +')')
+    # return reg_labels
 
 GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 3, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
 CONSEQ = {"Silent", "Nonsense", "Missense", "Deletion", "Frameshift", "Insertion/Deletion"}
 POLYGENETIC_OPTIONS = ['Family History', 'obese']
 GENE_TO_DISEASE = {'BC': ['BRCA1', 'BRCA2'], 'CC': ['MSH2', 'MSH6', 'PMS2', 'MLH1'], 'CAD': ['LDLR', 'APOB', 'PCSK9']}
-########################################
-###### Phenotypes Constants ############
-########################################
-PHENOTYPE_FILE = './data/phenotypes.json'
-PHENOTYPE_PAR = {'BC': ['PC1', 'PC2', 'PC3', 'PC4', 'gps_breastcancer'],
-                'CC': ['PC1', 'PC2', 'PC3', 'PC4', 'gps_ibd']}
+
+
 COVS1 = ['sex', 'Family History', 'PRS']
 COVS2 = ['Region 1', 'Region 2', 'Region 3', 'Region 4', 'Region 5']
 COVS3 = ['Missense', 'Silent', 'Nonsense', 'Frameshift', 'Insertion/Deletion']
 COVS4 = ['log Allele Frequency', 'Phylop', 'GERP', 'CADD']
 
-MUT_TYPES = ['Missense', 'Silent', 'Nonsense', 'Frameshift', 'Insertion/Deletion']
 
+
+MUT_TYPES = ['Missense', 'Silent', 'Nonsense', 'Frameshift', 'Insertion/Deletion']
+DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary Artery Disease'}
+
+
+
+SEXES = {0: 'Female', 1: 'Male'}
+FAM_HIST = {0: 'No Family History', 1: 'Family History'}
+COV_GRP_LABELS = {'sex': SEXES, 'Family History': FAM_HIST}
+
+VEP38_URL = 'https://rest.ensembl.org/vep/human/hgvs/'
+VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
+        
 #####################################
 ##### LOAD COXPH MODEL OBJECT #######
 #####################################
@@ -39,43 +66,6 @@ def load_model(model_loc):
         return model
 
 
-        
-    
-#####################################
-###### PROCESS PATIENT DATA #########
-#####################################
-        
-VEP38_URL = 'https://rest.ensembl.org/vep/human/hgvs/'
-VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
-        
-
-    
-##################################################
-###### Process User Input from Interface #########
-##################################################
-
-def get_polygenetic_input(disease, polygenetic_selected, gene_selected, prs=None):
-    polygene = {option: 1 if option in polygenetic_selected else 0 for option in POLYGENETIC_OPTIONS}
-    if prs !=None:
-        polygene["PRS"] = prs
-    for gene in GENE_TO_DISEASE[disease]:
-        if gene == gene_selected: 
-            polygene[gene] = 1
-        else:
-            polygene[gene] = 0
-    return polygene
-
-
-##################################################
-###### Process Patient Phenotypes like PCs #########
-##################################################
-
-def get_phenotypes(disease, phenotype_file = PHENOTYPE_FILE):
-    df = pd.read_json(phenotype_file)
-    if disease in PHENOTYPE_PAR:
-        return df[PHENOTYPE_PAR[disease]].apply(pd.to_numeric).mean(axis = 0, skipna = True)
-    else:
-        return 'No Data in Phenotype File'
 
 #####################################
 ###### SURVIVAL FUNCTION PLOT #######
@@ -93,7 +83,7 @@ def get_survival_callback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, 
             return {
                 'data': data,
                 'layout': {
-                        'title': 'Survival Probability of '+ dis_tab,
+                        'title': 'Survival Probability of '+ DISEASES[dis_tab],
                         'xaxis': {
                             'title': 'Age',
                             'type': 'linear' 
@@ -115,7 +105,7 @@ def get_survival_callback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, 
             return {
                 'data': data,
                 'layout': {
-                        'title': 'Survival Probability of '+ dis_tab,
+                        'title': 'Survival Probability of '+ DISEASES[dis_tab],
                         'xaxis': {
                             'title': 'Age',
                             'type': 'linear' 
@@ -139,13 +129,14 @@ def get_hazard_ratio(model, exp_coef = 'exp(coef)'):
     df = pd.DataFrame([np.exp(lower_upper.iloc[:,0]), target, np.exp(lower_upper.iloc[:,1])])
     return {col: list(df[col].values) for col in df.columns}
 
-def get_hazard_ratios_callback(model):
+def get_hazard_ratios_callback(gene, model):
     ph_ratios = get_hazard_ratio(model)
+    reg_labels = label_region(gene)
     cov_grps = [COVS1, COVS2, COVS3, COVS4]
     def fill_ph_ratios_plot(ph_data, title):
         return {'data': ph_data,
                  'layout': { 
-                     'title' : title,
+                     'title' : title.title(),
                      'xaxis': {
                          'title': 'Relative Risk or Hazard Ratio',
                          #'type': 'linear',
@@ -167,7 +158,7 @@ def get_hazard_ratios_callback(model):
         ph_ratios_plots = []
         for cov in cov_grps:
             ph_data = [
-              {'x': [xy[1]], 'y': [i], 'type': 'scatter', 'name': i, 'mode':'markers', 'showlegend': False,
+              {'x': [xy[1]], 'y': [reg_labels.get(i, i)], 'type': 'scatter', 'name': i, 'mode':'markers', 'showlegend': False,
                'error_x': {
                    'type': 'data',
                    'symmetric': False,
@@ -186,7 +177,7 @@ def get_hazard_ratios_callback(model):
     
 def get_plot_layout(title, xlabel, ylabel):
     return { 
-            'title' : title,
+            'title' : title.title(),
             'xaxis': {
                 'title': xlabel,
                 'type': 'linear' 
@@ -197,11 +188,6 @@ def get_plot_layout(title, xlabel, ylabel):
                 }
             }
 
-SEXES = {0: 'Female', 1: 'Male'}
-FAM_HIST = {0: 'No Family History', 1: 'Family History'}
-LOG_ALLELE_FREQ = {}
-
-COV_GRP_LABELS = {'sex': SEXES, 'Family History': FAM_HIST}
 
 def get_covariate_groups(model, model_input, covariate, val_range):
     if covariate =='Mutations':
@@ -243,7 +229,7 @@ def get_covariate_grps_callback(covariate, val_range, dis_tab, gene, mut_type, c
                     }  
         def plot_covariate_groups():
             cov_data = [
-                 {'x': covariate_groups.index, 'y': covariate_groups[cov_val], 'type': 'line', 'name':str( cov_val)}
+                 {'x': covariate_groups.index, 'y': covariate_groups[cov_val], 'type': 'line', 'name':str(cov_val)}
                  for cov_val in covariate_groups.columns
                  ]
             layout = get_plot_layout('Survival based on '+ covariate, 'Age', 'Survival Probability')
@@ -253,18 +239,6 @@ def get_covariate_grps_callback(covariate, val_range, dis_tab, gene, mut_type, c
 
 
 
-# def process_model_input(dis_tab, gene, n_pos, alt, obese_hist, prs, model):
-#     variant = id_variant(gene, n_pos, alt)
-#     var_args = extract_var_covs_from_VEP(variant)
-#     input_args = get_polygenetic_input(dis_tab, obese_hist, gene, prs)
-#     phenotype_args = get_phenotypes(dis_tab)
-#     all_args = {**var_args, **input_args, **phenotype_args}
-#     labels = model.summary.index
-#     data = [float(all_args.get(i, 0)) for i in labels]
-#     df = pd.DataFrame({'patient': data})
-#     df['labels'] = labels
-#     df = df.set_index('labels').T
-#     return df
 
 
 

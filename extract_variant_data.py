@@ -5,6 +5,10 @@ Created on Wed May 27 15:48:59 2020
 
 @author: thotran
 """
+
+
+import numpy as np
+
 LDLR = [0, 431, 829, 1343, 1886, 2579]
 APOB = [0, 1830, 5116, 7605, 10238, 13679]
 PCSK9 = [0, 42, 286, 426, 1120, 2054]
@@ -17,10 +21,6 @@ PMS2 = [0, 445, 1036, 1532, 2016, 2458.0]
 
 GENE_TO_BOUNDARIES = {'BRCA1' : BRCA1, 'BRCA2' : BRCA2, 'MSH2': MSH2, 'MSH6': MSH6, 'PMS2' : PMS2, 'MLH1': MLH1, 'LDLR': LDLR , 'APOB': APOB, 'PCSK9':PCSK9}
 
-
-
-
-import numpy as np
 
 MUT_TYPES = ['Missense', 'Silent', 'Nonsense', 'Frameshift', 'Insertion/Deletion']
 REGIONS = ['Region 1', 'Region 2', 'Region 3','Region 4', 'Region 5']
