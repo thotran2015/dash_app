@@ -26,10 +26,6 @@ GENE_TO_BOUNDARIES = {'BRCA1' : BRCA1, 'BRCA2' : BRCA2, 'MSH2': MSH2, 'MSH6': MS
 def label_region(gene):
     reg_bounds = GENE_TO_BOUNDARIES[gene]
     return {'Region '+ str(i+1): 'Region ' + str(i+1) + ' ('+ str(reg_bounds[i]) + '-'+ str(e) +')' for i, e in enumerate(reg_bounds[1:])}
-    # reg_labels = []
-    # for i, e in enumerate(reg_bounds[1:]):
-    #     reg_labels.append('Region ' + str(i+1) + ' ('+ str(reg_bounds[i]) + '-'+ str(e) +')')
-    # return reg_labels
 
 GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 3, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
 CONSEQ = {"Silent", "Nonsense", "Missense", "Deletion", "Frameshift", "Insertion/Deletion"}
@@ -38,7 +34,7 @@ GENE_TO_DISEASE = {'BC': ['BRCA1', 'BRCA2'], 'CC': ['MSH2', 'MSH6', 'PMS2', 'MLH
 
 
 COVS1 = ['sex', 'Family History', 'PRS']
-COVS2 = ['Region 1', 'Region 2', 'Region 3', 'Region 4', 'Region 5']
+REGIONS = ['Region 1', 'Region 2', 'Region 3', 'Region 4', 'Region 5']
 COVS3 = ['Missense', 'Silent', 'Nonsense', 'Frameshift', 'Insertion/Deletion']
 COVS4 = ['log Allele Frequency', 'Phylop', 'GERP', 'CADD']
 
@@ -132,7 +128,7 @@ def get_hazard_ratio(model, exp_coef = 'exp(coef)'):
 def get_hazard_ratios_callback(gene, model):
     ph_ratios = get_hazard_ratio(model)
     reg_labels = label_region(gene)
-    cov_grps = [COVS1, COVS2, COVS3, COVS4]
+    cov_grps = [COVS1, REGIONS, COVS3, COVS4]
     def fill_ph_ratios_plot(ph_data, title):
         return {'data': ph_data,
                  'layout': { 
@@ -200,6 +196,16 @@ def get_covariate_groups(model, model_input, covariate, val_range):
             cov_grps[val][val] = 1
         survival = model.predict_survival_function(cov_grps.T)
         return survival[survival.index>0]
+    elif covariate == 'Regions':
+        regions = list(set(REGIONS) & set(model.summary.index))
+        pat_label = 'Patient: ' + str(model_input[regions].idxmax())
+        cov_grps = pd.DataFrame(model_input, columns = [pat_label])
+        for val in regions:
+            cov_grps[val] = cov_grps[pat_label]
+            cov_grps[val][regions] = 0
+            cov_grps[val][val] = 1
+        survival = model.predict_survival_function(cov_grps.T)
+        return survival[survival.index>0]
     else:
         cov_val_label = COV_GRP_LABELS.get(covariate, {})
         pat_val = round(model_input[covariate], 2)
@@ -238,78 +244,3 @@ def get_covariate_grps_callback(covariate, val_range, dis_tab, gene, mut_type, c
 
 
 
-
-
-
-
-# def set_mutation_type_binary_vector(var_type, mut_types = MUTATION_TYPES, conseq = CONSEQ):
-#     mut_type = mut_types.get(var_type, 'Other')
-#     return {c: 1 if c == mut_type else 0 for c in conseq}
-
-# def get_survival_prob(model, patient_data):
-#     return model.predict_survival_function(patient_data)['patient'].to_dict()
-
-
-# def id_variant(gene, n_pos, alt, gene_to_chrom = GENE_TO_CHROM):
-#     #'17:g.41197701G>A'
-#     return str(gene_to_chrom[gene]) + ':g.' + str(n_pos) + alt
-
-# def request_var_data(variant):
-#     vep_server = "https://grch37.rest.ensembl.org/"
-#     ext = "/vep/human/hgvs/"
-#     api_url = vep_server+ext+variant+ '?Conservation=1&CADD=1&canonical=1'
-#     try:
-#         r = requests.get(api_url, headers={ "Content-Type" : "application/json"}, verify=False, timeout=5)
-#         if not r.ok:
-#             return "Bad request"
-#         decoded = r.json()[0]
-#         return decoded
-#     except requests.exceptions.Timeout:
-#         return "timeout"
-
-# def extract_var_covs_from_VEP(variant, counters = ['most_severe_consequence', 'transcript_consequences', 'colocated_variants']):
-#     info = {}
-#     data = request_var_data(variant)
-#     extracted = {c: data.get(c, None) for c in counters}
-#     can_trans =[t for t in extracted['transcript_consequences'] if 'canonical' in t] 
-#     if can_trans:
-#         info['CADD'] = can_trans[0].get('cadd_raw', 0.5)
-#         info['GERP'] = can_trans[0].get('conservation', 0.5)
-#         var_type = can_trans[0]['consequence_terms'][0]
-#         info.update(set_mutation_type_binary_vector(var_type))
-#     else:
-#         info['CADD'] = 0
-#         info['GERP'] = 0
-#         info.update(set_mutation_type_binary_vector('Other'))
-#     freq = float(extracted['colocated_variants'][0]['frequencies']['A']['gnomad']) 
-#     info['log Allele Frequency'] = -np.log10(freq)
-#     if info['log Allele Frequency']== 0.0:
-#         info['log Allele Frequency'] = 3e-6
-
-#     return info
-    
-        #[for val in val_range]
-           
-        #axes2 = model.plot_covariate_groups(covariate, values=val_range, cmap='coolwarm', label = 'covs', plot_baseline=False)
-        #lines = axes2.get_lines()
-        #axes2.clear()
-        
-        #print('covs:', model.predict_survival_function(covariate))
-    #return {i.get_label(): i.get_data() for i in lines}
-
-
-# covariates = ['log Allele Frequency', 'Phylop', 'GERP', 'CADD', 'Missense',
-#        'Nonsense', 'Frameshift', 'Insertion/Deletion', 'Silent', 'Transition',
-#        'Transversion', 'CpG Removing', 'CpG Creating', 'Splice Affecting',
-#        'PRS', 'PC1', 'PC2', 'PC3', 'PC4', 'Family History', 'Region 1',
-#        'Region 2', 'Region 3', 'Region 4', 'Region 5']
-# #'PRS':np.arange(-5, 6, 5), 'Family History': np.arange(0,2), 'Family History': np.arange(0,2), 'Family History': np.arange(0,2
-# cov_val_range = {'log Allele Frequency': np.arange(5e-5, 1e-4), 'Phylop': np.arange(0, 2), 
-#                  'GERP': np.arange(-5, 6, 5), 'CADD': np.arange(-5, 6, 5), 'Missense': np.arange(0, 2),
-#        'Nonsense': np.arange(0, 2), 'Frameshift': np.arange(0, 2) , 'Insertion/Deletion': np.arange(0, 2), 
-#        'Silent': np.arange(0,2), 'Transition': np.arange(-5, 6, 5),
-#        'Transversion': np.arange(0, 2), 'CpG Removing': np.arange(0, 2), 'CpG Creating': np.arange(0, 2), 
-#        'Splice Affecting': np.arange(0, 2), 'PRS': np.arange(-3, 3), 'PC1': np.arange(-18, -7, 2),
-#        'PC2': np.arange(0, 6, 2), 'PC3': np.arange(-5, 1, 2), 'PC4': np.arange(-3, 6, 2), 
-#        'Family History': np.arange(0,2), 'Region 1': np.arange(0,2),
-#        'Region 2': np.arange(0,2), 'Region 3': np.arange(0,2), 'Region 4': np.arange(0,2), 'Region 5': np.arange(0,2)}
