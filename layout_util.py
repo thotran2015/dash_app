@@ -45,14 +45,19 @@ BASE_MENU =  [html.Label('Sex'),
                 {'label': 'Family history', 'value': 'fam_his'}],
                 value = ['default'],
                 ),
-                  ]
+        ]
 #13-32890639-_-TTA
 #13-32890631-T-G
 
 def get_mutation_menu(disease):
     vals = DEFAULT_VARIANTS.get(disease)
     return [
-        html.P('Please, input your variant and health information below.', id = 'feedback'),
+        dcc.Loading(
+            id="loading-1",
+            type="default",
+            children=html.Div(id="loading-output-1")
+        ),
+        #html.P('Please, input your variant and health information below.', id = 'feedback'),
               html.Label('Gene'),
               dcc.Dropdown(id = 'gene', value=vals['gene'], 
       options = vals['gene_options'],
@@ -72,17 +77,17 @@ def get_mutation_menu(disease):
           style= dict(
               width='50%',
                     )),
-        html.Label('Nucleotide Position (e.g. 32890631 - 32890631'),
+        html.Label('Nucleotide Position (e.g. 32890631 - 32890631)'),
 
     dcc.Input(id= 'start', value =vals['start_pos'], type = 'number',    
               style= dict(
-          width='30%',
+          width='30%'
                 )),
     dcc.Input(id= 'end', value = vals['end_pos'], type = 'number',    
               style= dict(
           width='30%',
                 )),
-    html.Label('Alteration: Reference --> Alteration (e.g. T-->G, _-->G)'),
+    html.Label('Alteration: Reference -> Alteration (e.g. T->G, _->G)'),
     dcc.Input(id= 'ref', value = vals['ref'] , type = 'text', 
               style= dict(
           width='30%',
@@ -137,15 +142,3 @@ def setup_covariate_plot(id):
                                                'resetScale2d'],
                    
             })
-
-def setup_prs_slider(id = 'prs-slider', range_val = (-5,5,0.1)):
-    min, max, step = range_val
-    return dcc.Slider(
-      id = id,
-      min= min,
-      max= max,
-      step = step,
-      #marks={i: str(i) for i in range(-5,6)},
-      marks={i/2: str(i/2) for i in range(-10,12)},
-      value=0,
-    )

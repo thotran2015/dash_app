@@ -3,22 +3,15 @@ from app import app
 import numpy as np
 from callbacks_util import load_model, get_covariate_grps_callback, get_hazard_ratios_callback, get_survival_callback
 from process_input import get_pat_data 
-
+from constants import VEP37_URL, COV_DISEASE
+import time
 #############################################
 # Interaction Between Components / Controller
 #############################################
 
-#disease and their code names
-DISEASES = {'BC': 'Breast Cancer', 'CC': 'Colorectal Cancer', 'CAD': 'Coronary Artery Disease'}
-#parameter value range for each covariate group
-COV_OUTPUTS = [Output('covariate-plot-' + str(i), 'figure') for i in range(4)] 
-COV_DISEASE = {'BC': ['Family History', 'log Allele Frequency', 'Mutations', 'Regions'],
-               'CC':  ['Family History', 'log Allele Frequency', 'Mutations', 'Regions'],
-               'CAD' : ['Family History', 'log Allele Frequency', 'Mutations', 'Regions']}
 
 COVARIATES = {'log Allele Frequency':np.arange(0, 6, 1), 'Family History': np.arange(0,2), 'Mutations': np.arange(0,2), 
               'PRS': np.arange(0,3), 'sex': np.arange(0,2), 'Regions': np.arange(0,2)}
-GENE_TO_CHROM = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 3, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
 
 BRCA2_MODEL_LOC = './models/BRCA2_10_31.pickle'
 MLH1_MODEL_LOC = './models/MLH1_model.pickle'
@@ -34,7 +27,6 @@ LDLR_MODEL = load_model(LDLR_MODEL_LOC)
 
 GENE_MODELS = {'MLH1': MLH1_MODEL, 'BRCA2': BRCA2_MODEL, 'BRCA1': BRCA2_MODEL, 'LDLR': LDLR_MODEL}
 
-VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
 
 
 #####################################
@@ -42,7 +34,8 @@ VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
 #####################################
         
 @app.callback(
-    Output('feedback', 'children'),
+    #Output('feedback', 'children'),
+    Output('loading-output-1', 'children'),
     [Input(component_id='tabs', component_property='value'), 
     Input(component_id='gene', component_property='value'), 
     Input(component_id='mut_type', component_property='value'), 
@@ -56,7 +49,7 @@ VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
     ])
 def get_feedback(dis_tab, gene, mut_type, chrom, start, end, ref, alt, obese_hist, sex):
     pat_data = get_pat_data(gene, mut_type, chrom, start, end, ref, alt, dis_tab, sex,  obese_hist, VEP37_URL)
-    #print(pat_data)
+    time.sleep(1)
     if len(pat_data) == 0:
         return 'Your variant was not found in the database. Please, enter another variant.'
     else:
@@ -106,7 +99,7 @@ def plot_ph_ratios(tab, gene):
 
 
 @app.callback(
-    COV_OUTPUTS,
+    [Output('covariate-plot-' + str(i), 'figure') for i in range(4)], 
     [Input(component_id='tabs', component_property='value'),
     Input(component_id='gene', component_property='value'), 
     Input(component_id='mut_type', component_property='value'), 

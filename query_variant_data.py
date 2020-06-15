@@ -8,16 +8,12 @@ Created on Wed May 27 10:22:23 2020
 import requests, sys
 import json
 import os 
+from constants import VEP38_URL, EXT
+from store_data import set_redis, get_redis
 
 #https://rest.ensembl.org/vep/human/hgvs/3:g.36996633C%3ET/?CADD=1&canonical=1&dbNSFP=phyloP100way_vertebrate,GERP%2B%2B_RS
-VEP38_URL = 'https://rest.ensembl.org/vep/human/hgvs/'
-VEP37_URL = "https://grch37.rest.ensembl.org/vep/human/hgvs/"
-EXT = '/?CADD=1&canonical=1&dbNSFP=phyloP100way_vertebrate,GERP%2B%2B_RS'
-#GENE_TO_str(chrom) = {'BRCA1' : 17, 'BRCA2' : 13, 'MSH2': 2, 'MSH6': 2, 'PMS2' : 7, 'MLH1': 3, 'LDLR': 19 , 'APOB': 2, 'PCSK9':1}
 
-#def id_variant(gene, n_pos, str(alt), gene_to_str(chrom) = GENE_TO_str(chrom)):
-    #'17:g.41197701G>A'
-    #return str(gene_to_str(chrom)[gene]) + ':g.' + str(n_pos) + str(alt)
+
 
 
 def id_variant(mut_type, chrom, start, end, ref, alt):
@@ -52,6 +48,9 @@ def request_var_data(variant, vep_url):
     if os.path.exists(path):
         with open(path, 'r') as fp:
             return json.load(fp)
+    if get_redis(variant):
+        print('geting variant')
+        return get_redis(variant)
     try:
         api_url = vep_url + variant + EXT
         print(api_url)
@@ -62,7 +61,10 @@ def request_var_data(variant, vep_url):
             #sys.exit()
             #return "Bad request"
         decoded = r.json()[0]
+        print('saving data in redis')
+        set_redis(variant, json.dumps(decoded))
         with open(path, 'w') as fp:
+            print('saving data in filesystem')
             json.dump(decoded, fp)
         return decoded
     except requests.exceptions.Timeout:
